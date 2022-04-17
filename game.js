@@ -33,11 +33,31 @@ let foodDimensions = 100;
 const ACCELERATION = 0.1; // pixel/gametick²
 const MAXSPEED = 8;
 
+console.log(resources.tileset.texture);
+let loader = PIXI.Loader.shared;
+loader.add('hamburger', './spritesheets/hamburger.png');
+
+function createFoodSheet() {
+  let spriteSheet = new PIXI.BaseTexture.from(loader.resources['hamburger'].url);
+  let res = 32;
+  sprite = [
+    new PIXI.Texture(spriteSheet, new PIXI.Rectangle(0,0,32,32)),
+    new PIXI.Texture(spriteSheet, new PIXI.Rectangle(0,32,32,32)),
+    new PIXI.Texture(spriteSheet, new PIXI.Rectangle(0,64,32,32)),
+    new PIXI.Texture(spriteSheet, new PIXI.Rectangle(0,96,32,32)),
+  ];
+}
+createFoodSheet();
+let test = new PIXI.sprite(sprite[0]);
+game.stage.appendChild(test);
+
 class Food {
   isCooking = false;
   cookingPositionIndex = -1;
   timeCooked = 0;
+  isFadingOut = false
   isCollected = false;
+  fadePerTick = -0.03;
 
   constructor(x, y, xMomentum, yMomentum, angularMomentum) {   
     this.sprite = new PIXI.Sprite.from('./images/meatslab.jpg');
@@ -62,11 +82,15 @@ class Food {
     }
   } 
   update() {
-    if (this.isCollected) {
-      
+    if (this.isCollected & this.isFadingOut) {
+      this.sprite.alpha += this.fadePerTick;
+      if (this.sprite.alpha <= 0) {
+        this.isFadingOut = false;
+        //destroy 
+      }
     }
- 
     else if (!this.isCooking) {
+      this.updateIndicator();
       if (this.yMomentum < MAXSPEED - 0.1) {
         this.yMomentum += ACCELERATION;
       }
@@ -102,9 +126,9 @@ class Food {
   }
   collect() {
     this.angularMomentum = 0;
-    this.sprite.rotation = 0;
     this.xMomentum = 0;
     this.yMomentum = 0;
+    this.isFadingOut = true;
     this.isCollected = true;
   }
 }
@@ -225,7 +249,7 @@ let plate = new Plate(WIDTH - 200, HEIGHT - 150);
 
 let foodArray = [
   new Food(200, -200, 3, -5, 0.03),
-  new Food(100, -500, -2, 0, -0.03),
+  new Food(1150, 300, 0, 0, -0.03),
 ];
 
 for (let food of foodArray) {
@@ -236,7 +260,6 @@ game.ticker.add(delta => gameLoop(delta));
 function gameLoop(delta) {
   for (let food of foodArray){
     food.update();
-    food.updateIndicator();
     cookingPosition = bbq.hitboxCollided(food.sprite.position.x, food.sprite.position.y)
     if (cookingPosition != -1) {
       if (cookingPosition == -2) {
@@ -246,7 +269,7 @@ function gameLoop(delta) {
       }
     }
     if (plate.hitboxCollided(food.sprite.x, food.sprite.y)) {
-      console.log(true);
+      food.collect();
     }
   }  
   
@@ -261,5 +284,4 @@ function gameLoop(delta) {
 
 
 
-//first gamemode: arcade
-//bbq on the left, plate on the right,  
+// bug 1: bouncing objects
