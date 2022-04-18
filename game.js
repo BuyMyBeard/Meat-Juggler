@@ -39,17 +39,16 @@ const MAXDELTAX = 50;
 class Food {
   isCooking = false;
   cookingPositionIndex = -1;
-  timeCooked = 0;
   isFadingOut = false
   isCollected = false;
   fadePerTick = -0.03;
   maxAngularMomentum = 0.1; 
   framesCooked = 0;
-  state = 0; // 0: raw   1: mid   2: done   3: overcooked   4: burning
+  state = 0; // 0: raw   1: mid   2: done   3: overcooked   4: burning   -1 = unused
   
   constructor(x, y, xMomentum, yMomentum, angularMomentum, textures) {
     this.textures = textures;
-    this.sprite = new PIXI.Sprite(textures[0]);
+    this.sprite = new PIXI.Sprite(textures[this.state]);
     this.sprite.width = foodDimensions;
     this.sprite.height = foodDimensions;
     this.sprite.position.set(x, y);
@@ -63,6 +62,19 @@ class Food {
     game.stage.addChild(this.sprite);
     game.stage.addChild(this.indicator.sprite);
 
+  }
+  reuse(x, y, xMomentum, yMomentum, angularMomentum, textures) {
+    this.textures = textures;
+    this.state = 0;
+    this.sprite.texture = this.textures[state];
+    this.sprite.position.set(x, y);
+    this.xMomentum = xMomentum;
+    this.yMomentum = yMomentum;
+    this.angularMomentum = angularMomentum;
+    this.isCooking = false;
+    this.isCollected = false;
+    this.isFadingOut = false;
+    this.framesCooked = 0;
   }
   updateIndicator() {
     if (this.sprite.y < 0) {
