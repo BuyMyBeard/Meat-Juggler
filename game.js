@@ -6,7 +6,7 @@ let game = new application({
   height: HEIGHT,
   backgroundColor: 0xAAAAAA,
   transparent: false,
-  antialias : true,
+  antialias: true,
 });
 document.body.appendChild(game.view);
 game.renderer.view.style.position = 'absolute';
@@ -32,24 +32,7 @@ let xBaseIncrease = 4;
 let foodDimensions = 100;
 const ACCELERATION = 0.1; // pixel/gametick²
 const MAXSPEED = 8;
-
-console.log(resources.tileset.texture);
-let loader = PIXI.Loader.shared;
-loader.add('hamburger', './spritesheets/hamburger.png');
-
-function createFoodSheet() {
-  let spriteSheet = new PIXI.BaseTexture.from(loader.resources['hamburger'].url);
-  let res = 32;
-  sprite = [
-    new PIXI.Texture(spriteSheet, new PIXI.Rectangle(0,0,32,32)),
-    new PIXI.Texture(spriteSheet, new PIXI.Rectangle(0,32,32,32)),
-    new PIXI.Texture(spriteSheet, new PIXI.Rectangle(0,64,32,32)),
-    new PIXI.Texture(spriteSheet, new PIXI.Rectangle(0,96,32,32)),
-  ];
-}
-createFoodSheet();
-let test = new PIXI.sprite(sprite[0]);
-game.stage.appendChild(test);
+const ANGULARMOMENTUMINCREASE = 0.05;
 
 class Food {
   isCooking = false;
@@ -58,13 +41,15 @@ class Food {
   isFadingOut = false
   isCollected = false;
   fadePerTick = -0.03;
-
-  constructor(x, y, xMomentum, yMomentum, angularMomentum) {   
-    this.sprite = new PIXI.Sprite.from('./images/meatslab.jpg');
+  maxAngularMomentum = 0.1; 
+  ticker = PIXI.Ticker.shared;
+  
+  constructor(x, y, xMomentum, yMomentum, angularMomentum, textures) {
+    this.sprite = new PIXI.Sprite(textures[0]);
     this.sprite.width = foodDimensions;
     this.sprite.height = foodDimensions;
-    this.sprite.position.set(x,y);
-    this.sprite.anchor.set(0.5,0.5);
+    this.sprite.position.set(x, y);
+    this.sprite.anchor.set(0.5, 0.5);
     this.sprite.interactive = true;
     this.xMomentum = xMomentum;
     this.yMomentum = yMomentum;
@@ -73,6 +58,8 @@ class Food {
     this.indicator = new Indicator();
     game.stage.addChild(this.sprite);
     game.stage.addChild(this.indicator.sprite);
+    this.ticker.autoStart = false
+
   }
   updateIndicator() {
     if (this.sprite.y < 0) {
@@ -80,8 +67,9 @@ class Food {
     } else {
       this.indicator.sprite.x = -50;
     }
-  } 
+  }
   update() {
+    console.log(this.ticker.elapsedMS)
     if (this.isCollected & this.isFadingOut) {
       this.sprite.alpha += this.fadePerTick;
       if (this.sprite.alpha <= 0) {
@@ -100,11 +88,11 @@ class Food {
       if (this.sprite.x < this.sprite.width / 2 || this.sprite.x > WIDTH - this.sprite.width / 2) {
         this.xMomentum *= -1;
         this.angularMomentum *= -1;
-      } 
+      }
       if (this.sprite.y > HEIGHT + this.sprite.height) {
         //destroy
       }
-    } 
+    }
   }
   startCooking(cookingPosition) {
     this.angularMomentum = 0;
@@ -114,11 +102,13 @@ class Food {
     this.isCooking = true;
     this.sprite.position.set(cookingPosition[0], cookingPosition[1]);
     this.cookingPositionIndex = cookingPosition[2];
+    this.ticker.start();
   }
   stopCooking() {
     this.isCooking = false;
     let cookingPos = this.cookingPositionIndex;
     this.cookingPositionIndex = -1;
+    this.ticker.stop();
     return cookingPos;
   }
   bounce() {
@@ -155,17 +145,17 @@ class BBQ {
   // returns an array [cookingPositionX, cookingPositionY, cookingPositionIndex]. 
   // if hitbox not encountered, returns -1 instead
   // if hitbox encountered but busy, returns -2 instead
-  hitboxCollided(x, y) { 
-    if (y > this.hitboxYEnd || y < this.hitboxYStart) {return -1;}
+  hitboxCollided(x, y) {
+    if (y > this.hitboxYEnd || y < this.hitboxYStart) { return -1; }
     this.hitboxWidth = this.width / this.isBusy.length;
     for (let i = 0; i < this.isBusy.length; i++) {
       let isBiggerThanMinX = x > this.hitboxXStart + this.hitboxWidth * i;
-      let isSmallerThanMaxX =  x <= this.hitboxXStart + this.hitboxWidth * (i + 1);
+      let isSmallerThanMaxX = x <= this.hitboxXStart + this.hitboxWidth * (i + 1);
       let indexNotBusy = !this.isBusy[i];
       if (isBiggerThanMinX && isSmallerThanMaxX) {
         if (indexNotBusy) {
           this.isBusy[i] = true;
-          return [this.hitboxXStart + this.hitboxWidth * (i + 0.5) , this.hitboxYStart - 1 , i]; 
+          return [this.hitboxXStart + this.hitboxWidth * (i + 0.5), this.hitboxYStart - 1, i];
         }
         return -2;
       }
@@ -177,7 +167,7 @@ class BBQ {
   }
 }
 class Plate {
-
+  
   constructor(x, y) {
     this.sprite = new PIXI.Sprite.from("./images/meatslab.jpg");
     this.sprite.position.set(x, y);
@@ -200,8 +190,21 @@ function trackPointerPosition(e) {
   pointerPosition = e.data.global;
 }
 
+function generateTextures(name, location, resolution, spriteCount) {
+  game.loader.add(name, location);
+  let spriteSheet = new PIXI.BaseTexture.from(game.loader.resources[name].url);
+  let textures = [];
+  for (let i = 0; i < spriteCount; i++) {
+    textures[i] = new PIXI.Texture(spriteSheet, new PIXI.Rectangle(0, resolution * i, resolution, resolution));
+  }
+  return textures;
+}
+hamburgerTextures = generateTextures('hamburger', './spritesheets/hamburger.png', 32 * 4, 4);
+
+
+
 function initializeFoodOnClickEvent(food) {
-  food.sprite.on('pointerdown', function() {
+  food.sprite.on('pointerdown', function () {
     if (food.isCooking) {
       bbq.stopCooking(food.stopCooking());
     }
@@ -217,17 +220,35 @@ function initializeFoodOnClickEvent(food) {
     let momentumScaling = deltaX / (food.sprite.width / 2) * maxMultiplier * food.xMomentum;
     let xBaseIncrease = 4;
     
-    if (food.xMomentum >= 0) { 
+    if (food.xMomentum > 0) {
       food.xMomentum -= momentumScaling + xBaseIncrease;
-    } else { 
+      food.angularMomentum += ANGULARMOMENTUMINCREASE;
+    } else if (food.xMomentum == 0) {
+      if (deltaX <= 0) {
+        food.xMomentum += momentumScaling + xBaseIncrease;
+        food.angularMomentum += ANGULARMOMENTUMINCREASE;
+      } else {
+        food.xMomentum -= momentumScaling + xBaseIncrease
+        food.angularMomentum -= ANGULARMOMENTUMINCREASE;
+      }
+    }
+      else {
       food.xMomentum += momentumScaling + xBaseIncrease;
+      food.angularMomentum -= ANGULARMOMENTUMINCREASE;
     }
     if (food.xMomentum >= MAXSPEED) {
       food.xMomentum = MAXSPEED;
     } else if (food.xMomentum <= - MAXSPEED) {
       food.xMomentum = - MAXSPEED;
     }
-  }); 
+    console.log(food.angularMomentum);
+    if (food.angularMomentum >= food.maxAngularMomentum) {
+      food.angularMomentum = food.maxAngularMomentum;
+    } else if (food.angularMomentum <= -food.maxAngularMomentum) {
+      food.angularMomentum = - food.maxAngularMomentum;
+    }
+    console.log(food.angularMomentum);
+  });
 }
 
 //debug Info
@@ -237,7 +258,7 @@ for (let i = 0; i < infoCount; i++) {
   debugInfo[i] = new PIXI.Text("", style);
 }
 let debugPos = 0;
-for(let t of debugInfo) {
+for (let t of debugInfo) {
   game.stage.addChild(t);
   t.anchor.x = 1;
   t.position.set(WIDTH - 30, debugPos);
@@ -248,8 +269,8 @@ let bbq = new BBQ(300);
 let plate = new Plate(WIDTH - 200, HEIGHT - 150);
 
 let foodArray = [
-  new Food(200, -200, 3, -5, 0.03),
-  new Food(1150, 300, 0, 0, -0.03),
+  new Food(200, -200, 3, -5, 0.05, hamburgerTextures),
+  new Food(1150, 300, 0, 0, -0.03, hamburgerTextures),
 ];
 
 for (let food of foodArray) {
@@ -258,7 +279,7 @@ for (let food of foodArray) {
 
 game.ticker.add(delta => gameLoop(delta));
 function gameLoop(delta) {
-  for (let food of foodArray){
+  for (let food of foodArray) {
     food.update();
     cookingPosition = bbq.hitboxCollided(food.sprite.position.x, food.sprite.position.y)
     if (cookingPosition != -1) {
@@ -271,8 +292,8 @@ function gameLoop(delta) {
     if (plate.hitboxCollided(food.sprite.x, food.sprite.y)) {
       food.collect();
     }
-  }  
-  
+  }
+
   debugInfo[0].text = `meat position : (${Math.round(foodArray[0].sprite.x)}, ${Math.round(foodArray[0].sprite.y)})`;
   debugInfo[1].text = `meat momentum : (${foodArray[0].xMomentum.toFixed(1)}, ${foodArray[0].yMomentum.toFixed(1)})`;
   if (pointerPosition == undefined) {
@@ -285,3 +306,4 @@ function gameLoop(delta) {
 
 
 // bug 1: bouncing objects
+// bug 2: initial momentum after bbq
