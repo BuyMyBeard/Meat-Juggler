@@ -11,7 +11,8 @@ let game = new application({
 document.body.appendChild(game.view);
 game.renderer.view.style.position = 'absolute';
 const GRAPHICS = PIXI.Graphics;
-
+let ticker = PIXI.Ticker.shared;
+const FPS = Math.round(ticker.FPS);
 //debug text
 let style = new PIXI.TextStyle({
   fontFamily: 'Arial',
@@ -25,14 +26,15 @@ let style = new PIXI.TextStyle({
 // the farter from the sweet spot the object is hit vertically the less vertical speed
 // the farter from the middle horizontally the object is hit the more the horizontal momentum is affected
 let sweetSpot = 10; //pixels
-let sweetSpotIncrease = -8; //speed change
-let yBaseIncrease = -3; // minimum speed change before distance scaling added
+let sweetSpotMomentum = -8; //speed change
+let yBaseSpeed = -3; // minimum speed change before distance scaling added
 let maxMultiplier = 2.2;
 let xBaseIncrease = 4;
 let foodDimensions = 100;
 const ACCELERATION = 0.1; // pixel/gametick²
 const MAXSPEED = 8;
-const ANGULARMOMENTUMINCREASE = 0.05;
+const MAXROTATIONINCREASE = 0.1;
+const MAXDELTAX = 50;
 
 class Food {
   isCooking = false;
@@ -42,9 +44,11 @@ class Food {
   isCollected = false;
   fadePerTick = -0.03;
   maxAngularMomentum = 0.1; 
-  ticker = PIXI.Ticker.shared;
+  framesCooked = 0;
+  state = 0; // 0: raw   1: mid   2: done   3: overcooked   4: burning
   
   constructor(x, y, xMomentum, yMomentum, angularMomentum, textures) {
+    this.textures = textures;
     this.sprite = new PIXI.Sprite(textures[0]);
     this.sprite.width = foodDimensions;
     this.sprite.height = foodDimensions;
@@ -58,7 +62,6 @@ class Food {
     this.indicator = new Indicator();
     game.stage.addChild(this.sprite);
     game.stage.addChild(this.indicator.sprite);
-    this.ticker.autoStart = false
 
   }
   updateIndicator() {
@@ -68,30 +71,73 @@ class Food {
       this.indicator.sprite.x = -50;
     }
   }
+  updateMomentum() {
+    if (this.yMomentum < MAXSPEED - 0.1) {
+      this.yMomentum += ACCELERATION;
+    }
+    this.sprite.x += this.xMomentum;
+    this.sprite.y += this.yMomentum;
+    this.sprite.rotation += this.angularMomentum;
+    if (this.sprite.x < this.sprite.width / 2 || this.sprite.x > WIDTH - this.sprite.width / 2) {
+      this.xMomentum *= -1;
+      this.angularMomentum *= -1;
+    }
+    if (this.sprite.y > HEIGHT + this.sprite.height) {
+      //destroy
+    }
+  }
+  updateCooking() {
+    this.framesCooked++;
+    const MEDIUM = 3 * FPS;
+    const DONE = 6 * FPS;
+    const OVER = 9 * FPS;
+    const BURNING = 12 * FPS;
+    const BURNED = 20 * FPS;
+      switch (this.framesCooked) {
+        case MEDIUM:
+          this.state++;
+          this.sprite.texture = this.textures[this.state];
+          break;
+
+        case DONE:
+          this.state++;
+          this.sprite.texture = this.textures[this.state];
+          break;
+
+        case OVER:
+          this.state++;
+          this.sprite.texture = this.textures[this.state];
+          break;
+
+        case BURNING:
+          console.log("fire");
+          this.state++;
+          break;
+        
+        case BURNED:
+          console.log("poof");
+          //destroy
+          break;
+
+        default:
+          break;
+      }
+  }
   update() {
-    console.log(this.ticker.elapsedMS)
     if (this.isCollected & this.isFadingOut) {
       this.sprite.alpha += this.fadePerTick;
       if (this.sprite.alpha <= 0) {
         this.isFadingOut = false;
         //destroy 
       }
-    }
-    else if (!this.isCooking) {
+    } else if (this.isCooking) {
+      this.updateCooking();
+    } else {
+      if (this.state == 4) {
+        this.updateCooking();
+      }
       this.updateIndicator();
-      if (this.yMomentum < MAXSPEED - 0.1) {
-        this.yMomentum += ACCELERATION;
-      }
-      this.sprite.x += this.xMomentum;
-      this.sprite.y += this.yMomentum;
-      this.sprite.rotation += this.angularMomentum;
-      if (this.sprite.x < this.sprite.width / 2 || this.sprite.x > WIDTH - this.sprite.width / 2) {
-        this.xMomentum *= -1;
-        this.angularMomentum *= -1;
-      }
-      if (this.sprite.y > HEIGHT + this.sprite.height) {
-        //destroy
-      }
+      this.updateMomentum();
     }
   }
   startCooking(cookingPosition) {
@@ -102,17 +148,16 @@ class Food {
     this.isCooking = true;
     this.sprite.position.set(cookingPosition[0], cookingPosition[1]);
     this.cookingPositionIndex = cookingPosition[2];
-    this.ticker.start();
+
   }
   stopCooking() {
     this.isCooking = false;
     let cookingPos = this.cookingPositionIndex;
     this.cookingPositionIndex = -1;
-    this.ticker.stop();
     return cookingPos;
   }
   bounce() {
-    this.yMomentum *= -0.5;
+    this.yMomentum = - Math.abs(this.yMomentum);
   }
   collect() {
     this.angularMomentum = 0;
@@ -201,8 +246,6 @@ function generateTextures(name, location, resolution, spriteCount) {
 }
 hamburgerTextures = generateTextures('hamburger', './spritesheets/hamburger.png', 32 * 4, 4);
 
-
-
 function initializeFoodOnClickEvent(food) {
   food.sprite.on('pointerdown', function () {
     if (food.isCooking) {
@@ -210,46 +253,52 @@ function initializeFoodOnClickEvent(food) {
     }
     let deltaX = pointerPosition.x - food.sprite.x;
     let deltaY = pointerPosition.y - food.sprite.y;
+
+    //y momentum
     if (Math.abs(deltaY) < sweetSpot) {
-      food.yMomentum = sweetSpotIncrease;
+      food.yMomentum = sweetSpotMomentum;
     } else {
-      let momentumIncrease = ((sweetSpotIncrease - yBaseIncrease) * sweetSpot / Math.abs(deltaY) + yBaseIncrease);
-      food.yMomentum = momentumIncrease;
+      let newMomentum = ((sweetSpotMomentum - yBaseSpeed) * sweetSpot / Math.abs(deltaY) + yBaseSpeed);
+      food.yMomentum = newMomentum;
     }
+
+    // x momentum and rotation
     let maxMultiplier = 2.2;
     let momentumScaling = deltaX / (food.sprite.width / 2) * maxMultiplier * food.xMomentum;
     let xBaseIncrease = 4;
-    
+    let rotationIncrease = - MAXROTATIONINCREASE * deltaX / MAXDELTAX;
+
     if (food.xMomentum > 0) {
       food.xMomentum -= momentumScaling + xBaseIncrease;
-      food.angularMomentum += ANGULARMOMENTUMINCREASE;
+      food.angularMomentum += rotationIncrease;
     } else if (food.xMomentum == 0) {
       if (deltaX <= 0) {
         food.xMomentum += momentumScaling + xBaseIncrease;
-        food.angularMomentum += ANGULARMOMENTUMINCREASE;
+        food.angularMomentum += rotationIncrease;
       } else {
         food.xMomentum -= momentumScaling + xBaseIncrease
-        food.angularMomentum -= ANGULARMOMENTUMINCREASE;
+        food.angularMomentum += rotationIncrease;
       }
     }
       else {
       food.xMomentum += momentumScaling + xBaseIncrease;
-      food.angularMomentum -= ANGULARMOMENTUMINCREASE;
+      food.angularMomentum += rotationIncrease;
     }
+
+    //limiters
     if (food.xMomentum >= MAXSPEED) {
       food.xMomentum = MAXSPEED;
     } else if (food.xMomentum <= - MAXSPEED) {
       food.xMomentum = - MAXSPEED;
     }
-    console.log(food.angularMomentum);
     if (food.angularMomentum >= food.maxAngularMomentum) {
       food.angularMomentum = food.maxAngularMomentum;
     } else if (food.angularMomentum <= -food.maxAngularMomentum) {
       food.angularMomentum = - food.maxAngularMomentum;
     }
-    console.log(food.angularMomentum);
   });
 }
+
 
 //debug Info
 let infoCount = 10;
@@ -269,8 +318,8 @@ let bbq = new BBQ(300);
 let plate = new Plate(WIDTH - 200, HEIGHT - 150);
 
 let foodArray = [
-  new Food(200, -200, 3, -5, 0.05, hamburgerTextures),
-  new Food(1150, 300, 0, 0, -0.03, hamburgerTextures),
+  new Food(718, 514, 0, 0, 0.05, hamburgerTextures),
+  new Food(557, 514, 0, 0, -0.03, hamburgerTextures),
 ];
 
 for (let food of foodArray) {
@@ -301,9 +350,8 @@ function gameLoop(delta) {
   } else {
     debugInfo[2].text = `cursor position : (${Math.round(pointerPosition.x)}, ${Math.round(pointerPosition.y)})`;
   }
+  debugInfo[3].text = "FPS : " + Math.round(ticker.FPS);
 }
 
 
-
-// bug 1: bouncing objects
-// bug 2: initial momentum after bbq
+//potential bug: package-lock.json 5000 lines limit 
