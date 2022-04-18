@@ -327,7 +327,7 @@ for (let food of foodArray) {
 }
 
 game.ticker.add(delta => gameLoop(delta));
-function gameLoop(delta) {
+function gameLoop() {
   for (let food of foodArray) {
     food.update();
     cookingPosition = bbq.hitboxCollided(food.sprite.position.x, food.sprite.position.y)
@@ -354,4 +354,4 @@ function gameLoop(delta) {
 }
 
 
-//potential bug: package-lock.json 5000 lines limit 
+//potential bug: package-lock.json 5000 lines limit (?)
