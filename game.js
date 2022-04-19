@@ -279,10 +279,15 @@ class Lives {
     }
   }  
   reset() {
-    count = this.hearts.length;
+    this.count = this.hearts.length;
     for (let heart of hearts) {
       heart.alpha = 1;
     }
+  }
+  disable() {
+    this.hearts.forEach((heart) => {
+      heart.alpha = 0;
+    });
   }
 }
 
@@ -420,7 +425,7 @@ for (let food of foodArray) {
   initializeFoodOnClickEvent(food);
 }
 
-game.ticker.add(delta => gameLoop(delta));
+// game.ticker.add(delta => gameLoop(delta));
 function gameLoop() {
   for (let food of foodArray) {
     food.update();
@@ -444,11 +449,10 @@ function gameLoop() {
   } else {
     debugInfo[2].text = `cursor position : (${Math.round(pointerPosition.x)}, ${Math.round(pointerPosition.y)})`;
   }
-  debugInfo[3].text = "FPS : " + Math.round(ticker.FPS);
 }
 
 
 lives = new Lives(hamburgerTextures[0], 3, 30);
-
+lives.disable();
 
 //potential bug: package-lock.json 5000 lines limit (?)
