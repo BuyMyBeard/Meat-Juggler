@@ -36,6 +36,7 @@ const ACCELERATION = 0.1; // pixel/gametick²
 const MAXSPEED = 8;
 const MAXROTATIONINCREASE = 0.1;
 const MAXDELTAX = 50;
+maxAngularMomentum = 0.1; 
 let lives;
 class Food {
   isCooking = false;
@@ -43,7 +44,6 @@ class Food {
   isFadingOut = false
   isCollected = false;
   fadePerTick = -0.03;
-  maxAngularMomentum = 0.1; 
   framesCooked = 0;
   state = 0; // 0: raw   1: mid   2: done   3: overcooked   4: burning   -1 = unused
   
@@ -54,7 +54,7 @@ class Food {
     this.sprite.height = foodDimensions;
     this.sprite.position.set(x, y);
     this.sprite.anchor.set(0.5, 0.5);
-    this.sprite.interactive = true;
+    this.sprite.interactive = false;
     this.xMomentum = xMomentum;
     this.yMomentum = yMomentum;
     this.angularMomentum = angularMomentum;
@@ -102,13 +102,18 @@ class Food {
     this.sprite.x += this.xMomentum;
     this.sprite.y += this.yMomentum;
     this.sprite.rotation += this.angularMomentum;
-    if (this.sprite.x < this.sprite.width / 2 || this.sprite.x > WIDTH - this.sprite.width / 2) {
-      this.xMomentum *= -1;
+    if (this.sprite.x < this.sprite.width / 2){
+      this.xMomentum = Math.abs(this.xMomentum)
+      this.angularMomentum *= -1;
+    } else if (this.sprite.x > WIDTH - this.sprite.width / 2) {
+      this.xMomentum = - Math.abs(this.xMomentum)
       this.angularMomentum *= -1;
     }
     if (this.sprite.y > HEIGHT + 2 * this.sprite.height) {
       this.disable();
-      lives.lose();
+      if (this.sprite.interactive) {
+        lives.lose();
+      }
     }
   }
   updateCooking() {
@@ -301,7 +306,7 @@ function generateTextures(name, location, resolution, spriteCount) {
 hamburgerTextures = generateTextures('hamburger', './spritesheets/hamburger.png', 32 * 4, 4);
 
 function initializeFoodOnClickEvent(food) {
-  food.sprite.on('pointerdown', function () {
+  food.sprite.on('pointerdown', () => {
     if (food.isCooking) {
       bbq.stopCooking(food.stopCooking());
     }
@@ -368,13 +373,48 @@ for (let t of debugInfo) {
   debugPos += 20;
 }
 
-let bbq = new BBQ(300);
-let plate = new Plate(WIDTH - 200, HEIGHT - 150);
+bbq = new BBQ(-1000);
+plate = new Plate(0, -1000);
+//bbq = new BBQ(300);
+//plate = new Plate(WIDTH - 200, HEIGHT - 150);
 
 let foodArray = [
-  new Food(718, 514, 0, 0, 0.05, hamburgerTextures),
-  new Food(557, 514, 0, 0, -0.03, hamburgerTextures),
+  new Food(-100, 500, 8, -5, 0.05, hamburgerTextures),
+  new Food(WIDTH + 150, 300 , -6, 0, -0.03, hamburgerTextures),
+  new Food(WIDTH + 150, 300 , -6, 0, -0.03, hamburgerTextures),
+  new Food(WIDTH + 150, 300 , -6, 0, -0.03, hamburgerTextures),
+  new Food(WIDTH + 150, 300 , -6, 0, -0.03, hamburgerTextures),
 ];
+
+function randomIntegerGenerator(min, max) {
+  return Math.floor(Math.random() * (max + 1 - min) + min);
+}
+function randomDoubleGenerator(min, max) {
+  return Math.random() * (max - min) + min;
+}
+game.ticker.add(delta => menuLoop(delta));
+function menuLoop() {
+  foodArray.forEach((food) => {
+    const MINX = -200;
+    const MAXX = -100;
+    const MINY = -100;
+    const MAXY = HEIGHT;
+    const MINXMOMENTUM = 4;
+    const MAXXMOMENTUM = 8;
+    const MINYMOMENTUM = -5;
+    const MAXYMOMENTUM = 0;
+    if (food.state == -1) {
+      let side = randomIntegerGenerator(0, 1); // 0: left, 1: right
+      let x = Math.pow(-1, side) * randomDoubleGenerator(MINX, MAXX) + side * WIDTH;
+      let y = randomDoubleGenerator(MINY, MAXY);
+      let xMomentum = Math.pow(-1, side) * randomDoubleGenerator(MINXMOMENTUM, MAXXMOMENTUM);
+      let yMomentum = randomDoubleGenerator(MINYMOMENTUM, MAXYMOMENTUM);
+      let angularMomentum = randomDoubleGenerator(- maxAngularMomentum, maxAngularMomentum);
+      food.recycle(x, y, xMomentum, yMomentum, angularMomentum, hamburgerTextures);
+    }
+    food.update();
+  });
+}
 
 for (let food of foodArray) {
   initializeFoodOnClickEvent(food);
