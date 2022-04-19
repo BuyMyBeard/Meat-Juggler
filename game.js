@@ -35,7 +35,7 @@ const ACCELERATION = 0.1; // pixel/gametick²
 const MAXSPEED = 8;
 const MAXROTATIONINCREASE = 0.1;
 const MAXDELTAX = 50;
-
+let lives;
 class Food {
   isCooking = false;
   cookingPositionIndex = -1;
@@ -63,18 +63,29 @@ class Food {
     game.stage.addChild(this.indicator.sprite);
 
   }
-  reuse(x, y, xMomentum, yMomentum, angularMomentum, textures) {
+  recycle(x, y, xMomentum, yMomentum, angularMomentum, textures) {
     this.textures = textures;
     this.state = 0;
-    this.sprite.texture = this.textures[state];
+    this.sprite.texture = this.textures[this.state];
     this.sprite.position.set(x, y);
     this.xMomentum = xMomentum;
     this.yMomentum = yMomentum;
     this.angularMomentum = angularMomentum;
+    this.sprite.alpha = 1;
+  }
+  disable() {
+    this.sprite.position.set(-400, 0);
+    this.sprite.xMomentum = 0;
+    this.sprite.yMomentum = 0;
+    this.sprite.alpha = 0;
     this.isCooking = false;
     this.isCollected = false;
     this.isFadingOut = false;
+    this.angularMomentum = 0;
+    this.state = -1;
+    this.sprite.rotation = 0;
     this.framesCooked = 0;
+    console.log("disabled");
   }
   updateIndicator() {
     if (this.sprite.y < 0) {
@@ -94,8 +105,9 @@ class Food {
       this.xMomentum *= -1;
       this.angularMomentum *= -1;
     }
-    if (this.sprite.y > HEIGHT + this.sprite.height) {
-      //destroy
+    if (this.sprite.y > HEIGHT + 2 * this.sprite.height) {
+      this.disable();
+      lives.lose();
     }
   }
   updateCooking() {
@@ -128,7 +140,8 @@ class Food {
         
         case BURNED:
           console.log("poof");
-          //destroy
+          this.disable();
+          lives.lose();
           break;
 
         default:
@@ -136,11 +149,12 @@ class Food {
       }
   }
   update() {
-    if (this.isCollected & this.isFadingOut) {
+    if (this.state == -1) {}
+    else if (this.isCollected & this.isFadingOut) {
       this.sprite.alpha += this.fadePerTick;
       if (this.sprite.alpha <= 0) {
         this.isFadingOut = false;
-        //destroy 
+        this.disable();
       }
     } else if (this.isCooking) {
       this.updateCooking();
@@ -239,6 +253,33 @@ class Plate {
     return false;
   }
 }
+class Lives {
+  constructor(texture, count, separation) {
+    this.hearts = [];
+    for(let i = 0; i < count; i++) {
+      let heart = new PIXI.Sprite(texture);
+      heart.position.x = i * separation;
+      heart.scale.set(0.5,0.5)
+      game.stage.addChild(heart);
+      this.hearts.push(heart);
+      this.count = count;
+    }
+  } 
+  lose() {
+    this.count--;
+    this.hearts[this.count].alpha = 0;
+    if (this.count == 0) {
+      // game over
+    }
+  }  
+  reset() {
+    count = this.hearts.length;
+    for (let heart of hearts) {
+      heart.alpha = 1;
+    }
+  }
+}
+
 
 let pointerPosition;
 game.stage.interactive = true;
@@ -364,6 +405,9 @@ function gameLoop() {
   }
   debugInfo[3].text = "FPS : " + Math.round(ticker.FPS);
 }
+
+
+lives = new Lives(hamburgerTextures[0], 3, 30);
 
 
 //potential bug: package-lock.json 5000 lines limit (?)
