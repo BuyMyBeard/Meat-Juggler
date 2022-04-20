@@ -21,6 +21,7 @@ let style = new PIXI.TextStyle({
   stroke: '#EEEEEE'
 });
 
+
 //food common variables
 // hitting the object in the sweet spot vertically gives him the most vertical speed
 // the farter from the sweet spot the object is hit vertically the less vertical speed
