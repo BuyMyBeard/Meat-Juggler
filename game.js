@@ -21,6 +21,7 @@ let style = new PIXI.TextStyle({
   stroke: '#EEEEEE'
 });
 
+
 //food common variables
 // hitting the object in the sweet spot vertically gives him the most vertical speed
 // the farter from the sweet spot the object is hit vertically the less vertical speed
@@ -35,26 +36,25 @@ const ACCELERATION = 0.1; // pixel/gametick²
 const MAXSPEED = 8;
 const MAXROTATIONINCREASE = 0.1;
 const MAXDELTAX = 50;
-
+maxAngularMomentum = 0.1; 
+let lives;
 class Food {
   isCooking = false;
   cookingPositionIndex = -1;
-  timeCooked = 0;
   isFadingOut = false
   isCollected = false;
   fadePerTick = -0.03;
-  maxAngularMomentum = 0.1; 
   framesCooked = 0;
-  state = 0; // 0: raw   1: mid   2: done   3: overcooked   4: burning
+  state = 0; // 0: raw   1: mid   2: done   3: overcooked   4: burning   -1 = unused
   
   constructor(x, y, xMomentum, yMomentum, angularMomentum, textures) {
     this.textures = textures;
-    this.sprite = new PIXI.Sprite(textures[0]);
+    this.sprite = new PIXI.Sprite(textures[this.state]);
     this.sprite.width = foodDimensions;
     this.sprite.height = foodDimensions;
     this.sprite.position.set(x, y);
     this.sprite.anchor.set(0.5, 0.5);
-    this.sprite.interactive = true;
+    this.sprite.interactive = false;
     this.xMomentum = xMomentum;
     this.yMomentum = yMomentum;
     this.angularMomentum = angularMomentum;
@@ -63,6 +63,30 @@ class Food {
     game.stage.addChild(this.sprite);
     game.stage.addChild(this.indicator.sprite);
 
+  }
+  recycle(x, y, xMomentum, yMomentum, angularMomentum, textures) {
+    this.textures = textures;
+    this.state = 0;
+    this.sprite.texture = this.textures[this.state];
+    this.sprite.position.set(x, y);
+    this.xMomentum = xMomentum;
+    this.yMomentum = yMomentum;
+    this.angularMomentum = angularMomentum;
+    this.sprite.alpha = 1;
+  }
+  disable() {
+    this.sprite.position.set(-400, 0);
+    this.sprite.xMomentum = 0;
+    this.sprite.yMomentum = 0;
+    this.sprite.alpha = 0;
+    this.isCooking = false;
+    this.isCollected = false;
+    this.isFadingOut = false;
+    this.angularMomentum = 0;
+    this.state = -1;
+    this.sprite.rotation = 0;
+    this.framesCooked = 0;
+    console.log("disabled");
   }
   updateIndicator() {
     if (this.sprite.y < 0) {
@@ -78,12 +102,18 @@ class Food {
     this.sprite.x += this.xMomentum;
     this.sprite.y += this.yMomentum;
     this.sprite.rotation += this.angularMomentum;
-    if (this.sprite.x < this.sprite.width / 2 || this.sprite.x > WIDTH - this.sprite.width / 2) {
-      this.xMomentum *= -1;
+    if (this.sprite.x < this.sprite.width / 2){
+      this.xMomentum = Math.abs(this.xMomentum)
+      this.angularMomentum *= -1;
+    } else if (this.sprite.x > WIDTH - this.sprite.width / 2) {
+      this.xMomentum = - Math.abs(this.xMomentum)
       this.angularMomentum *= -1;
     }
-    if (this.sprite.y > HEIGHT + this.sprite.height) {
-      //destroy
+    if (this.sprite.y > HEIGHT + 2 * this.sprite.height) {
+      this.disable();
+      if (this.sprite.interactive) {
+        lives.lose();
+      }
     }
   }
   updateCooking() {
@@ -116,7 +146,8 @@ class Food {
         
         case BURNED:
           console.log("poof");
-          //destroy
+          this.disable();
+          lives.lose();
           break;
 
         default:
@@ -124,11 +155,12 @@ class Food {
       }
   }
   update() {
-    if (this.isCollected & this.isFadingOut) {
+    if (this.state == -1) {}
+    else if (this.isCollected & this.isFadingOut) {
       this.sprite.alpha += this.fadePerTick;
       if (this.sprite.alpha <= 0) {
         this.isFadingOut = false;
-        //destroy 
+        this.disable();
       }
     } else if (this.isCooking) {
       this.updateCooking();
@@ -227,6 +259,38 @@ class Plate {
     return false;
   }
 }
+class Lives {
+  constructor(texture, count, separation) {
+    this.hearts = [];
+    for(let i = 0; i < count; i++) {
+      let heart = new PIXI.Sprite(texture);
+      heart.position.x = i * separation;
+      heart.scale.set(0.5,0.5)
+      game.stage.addChild(heart);
+      this.hearts.push(heart);
+      this.count = count;
+    }
+  } 
+  lose() {
+    this.count--;
+    this.hearts[this.count].alpha = 0;
+    if (this.count == 0) {
+      // game over
+    }
+  }  
+  reset() {
+    this.count = this.hearts.length;
+    for (let heart of hearts) {
+      heart.alpha = 1;
+    }
+  }
+  disable() {
+    this.hearts.forEach((heart) => {
+      heart.alpha = 0;
+    });
+  }
+}
+
 
 let pointerPosition;
 game.stage.interactive = true;
@@ -247,7 +311,7 @@ function generateTextures(name, location, resolution, spriteCount) {
 hamburgerTextures = generateTextures('hamburger', './spritesheets/hamburger.png', 32 * 4, 4);
 
 function initializeFoodOnClickEvent(food) {
-  food.sprite.on('pointerdown', function () {
+  food.sprite.on('pointerdown', () => {
     if (food.isCooking) {
       bbq.stopCooking(food.stopCooking());
     }
@@ -314,19 +378,54 @@ for (let t of debugInfo) {
   debugPos += 20;
 }
 
-let bbq = new BBQ(300);
-let plate = new Plate(WIDTH - 200, HEIGHT - 150);
+bbq = new BBQ(-1000);
+plate = new Plate(0, -1000);
+//bbq = new BBQ(300);
+//plate = new Plate(WIDTH - 200, HEIGHT - 150);
 
 let foodArray = [
-  new Food(718, 514, 0, 0, 0.05, hamburgerTextures),
-  new Food(557, 514, 0, 0, -0.03, hamburgerTextures),
+  new Food(-100, 500, 8, -5, 0.05, hamburgerTextures),
+  new Food(WIDTH + 150, 300 , -6, 0, -0.03, hamburgerTextures),
+  new Food(WIDTH + 150, 300 , -6, 0, -0.03, hamburgerTextures),
+  new Food(WIDTH + 150, 300 , -6, 0, -0.03, hamburgerTextures),
+  new Food(WIDTH + 150, 300 , -6, 0, -0.03, hamburgerTextures),
 ];
+
+function randomIntegerGenerator(min, max) {
+  return Math.floor(Math.random() * (max + 1 - min) + min);
+}
+function randomDoubleGenerator(min, max) {
+  return Math.random() * (max - min) + min;
+}
+game.ticker.add(delta => menuLoop(delta));
+function menuLoop() {
+  foodArray.forEach((food) => {
+    const MINX = -200;
+    const MAXX = -100;
+    const MINY = -100;
+    const MAXY = HEIGHT;
+    const MINXMOMENTUM = 4;
+    const MAXXMOMENTUM = 8;
+    const MINYMOMENTUM = -5;
+    const MAXYMOMENTUM = 0;
+    if (food.state == -1) {
+      let side = randomIntegerGenerator(0, 1); // 0: left, 1: right
+      let x = Math.pow(-1, side) * randomDoubleGenerator(MINX, MAXX) + side * WIDTH;
+      let y = randomDoubleGenerator(MINY, MAXY);
+      let xMomentum = Math.pow(-1, side) * randomDoubleGenerator(MINXMOMENTUM, MAXXMOMENTUM);
+      let yMomentum = randomDoubleGenerator(MINYMOMENTUM, MAXYMOMENTUM);
+      let angularMomentum = randomDoubleGenerator(- maxAngularMomentum, maxAngularMomentum);
+      food.recycle(x, y, xMomentum, yMomentum, angularMomentum, hamburgerTextures);
+    }
+    food.update();
+  });
+}
 
 for (let food of foodArray) {
   initializeFoodOnClickEvent(food);
 }
 
-game.ticker.add(delta => gameLoop(delta));
+// game.ticker.add(delta => gameLoop(delta));
 function gameLoop() {
   for (let food of foodArray) {
     food.update();
@@ -350,8 +449,10 @@ function gameLoop() {
   } else {
     debugInfo[2].text = `cursor position : (${Math.round(pointerPosition.x)}, ${Math.round(pointerPosition.y)})`;
   }
-  debugInfo[3].text = "FPS : " + Math.round(ticker.FPS);
 }
 
+
+lives = new Lives(hamburgerTextures[0], 3, 30);
+lives.disable();
 
 //potential bug: package-lock.json 5000 lines limit (?)
