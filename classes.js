@@ -7,7 +7,6 @@ let sweetSpotMomentum = -8; //speed change
 let yBaseSpeed = -3; // minimum speed change before distance scaling added
 let maxMultiplier = 2.2;
 let xBaseIncrease = 4;
-let foodDimensions = 100;
 const ACCELERATION = 0.1; // pixel/gametick²
 const MAXSPEED = 8;
 const MAXROTATIONINCREASE = 0.1;
@@ -21,13 +20,11 @@ class Food {
   isCollected = false;
   fadePerTick = -0.03;
   framesCooked = 0;
-  state = 0; // 0: raw   1: mid   2: done   3: overcooked   4: burning   -1 = unused
+  state = 1; // 1: raw   2: mid   3: done   4: well done   4: overcooked   5: burning   -1 = unused
   
   constructor(x, y, xMomentum, yMomentum, angularMomentum, textures) {
     this.textures = textures;
     this.sprite = new PIXI.Sprite(textures[this.state]);
-    this.sprite.width = foodDimensions;
-    this.sprite.height = foodDimensions;
     this.sprite.position.set(x, y);
     this.sprite.anchor.set(0.5, 0.5);
     this.sprite.interactive = false;
@@ -35,14 +32,14 @@ class Food {
     this.yMomentum = yMomentum;
     this.angularMomentum = angularMomentum;
     this.sprite.rotation = 0;
-    this.indicator = new Indicator();
+    this.indicator = new Indicator(textures[0]);
     game.stage.addChild(this.sprite);
     game.stage.addChild(this.indicator.sprite);
 
   }
   recycle(x, y, xMomentum, yMomentum, angularMomentum, textures) {
     this.textures = textures;
-    this.state = 0;
+    this.state = 1
     this.sprite.texture = this.textures[this.state];
     this.sprite.position.set(x, y);
     this.xMomentum = xMomentum;
@@ -68,7 +65,7 @@ class Food {
     if (this.sprite.y < 0) {
       this.indicator.sprite.x = this.sprite.x;
     } else {
-      this.indicator.sprite.x = -50;
+      this.indicator.sprite.x = -200;
     }
   }
   updateMomentum() {
@@ -96,28 +93,21 @@ class Food {
     this.framesCooked++;
     const MEDIUM = 3 * FPS;
     const DONE = 6 * FPS;
-    const OVER = 9 * FPS;
+    const WELLDONE = 9 * FPS;
     const BURNING = 12 * FPS;
     const BURNED = 20 * FPS;
       switch (this.framesCooked) {
         case MEDIUM:
-          this.state++;
-          this.sprite.texture = this.textures[this.state];
-          break;
-
         case DONE:
-          this.state++;
-          this.sprite.texture = this.textures[this.state];
-          break;
-
-        case OVER:
+        case WELLDONE:
           this.state++;
           this.sprite.texture = this.textures[this.state];
           break;
 
         case BURNING:
-          console.log("fire");
           this.state++;
+          this.sprite.texture = this.textures[this.state];
+          console.log("fire");
           break;
         
         case BURNED:
@@ -141,7 +131,7 @@ class Food {
     } else if (this.isCooking) {
       this.updateCooking();
     } else {
-      if (this.state == 4) {
+      if (this.state == 5) {
         this.updateCooking();
       }
       this.updateIndicator();
@@ -177,10 +167,10 @@ class Food {
 }
 
 class Indicator {
-  constructor() {
-    this.sprite = new PIXI.Sprite.from('./images/indicator.png');
+  constructor(texture) {
+    this.sprite = new PIXI.Sprite(texture);
     this.sprite.anchor.set(0.5, 0.5);
-    this.sprite.position.set(-50, 30);
+    this.sprite.position.set(-200, 60);
   }
 }
 class BBQ {
@@ -252,6 +242,7 @@ class Lives {
     this.hearts[this.count].alpha = 0;
     if (this.count == 0) {
       // game over
+      endSong();
     }
   }  
   reset() {

@@ -41,9 +41,8 @@ function playMainSong() {
   });
 }
 
-playMainSong();
 
-function end() {
+function endSong() {
   music.flippinMeat.once('end', () => {
     music.flippinMeat.stop();
     music.flippinMeat.play('defeat');
@@ -68,7 +67,15 @@ function generateTextures(name, location, resolution, spriteCount) {
   }
   return textures;
 }
-hamburgerTextures = generateTextures('hamburger', './spritesheets/hamburger.png', 32 * 4, 4);
+foodTextures = [
+  generateTextures('hamburger', './spritesheets/hamburger.png', 32 * 4, 6),
+  generateTextures('chicken', './spritesheets/chicken.png', 32 * 4, 6),
+  generateTextures('pork', './spritesheets/pork.png', 32 * 4, 6),
+  generateTextures('sausage', './spritesheets/sausage.png', 32 * 4, 6),
+  generateTextures('skewer', './spritesheets/skewer.png', 32 * 4, 6),
+  generateTextures('steak', './spritesheets/steak.png', 32 * 4, 6)
+]
+
 
 function initializeFoodOnClickEvent(food) {
   food.sprite.on('pointerdown', () => {
@@ -143,11 +150,11 @@ plate = new Plate(0, -1000);
 //plate = new Plate(WIDTH - 200, HEIGHT - 150);
 
 let foodArray = [
-  new Food(-100, 500, 8, -5, 0.05, hamburgerTextures),
-  new Food(WIDTH + 150, 300 , -6, 0, -0.03, hamburgerTextures),
-  new Food(WIDTH + 150, 300 , -6, 0, -0.03, hamburgerTextures),
-  new Food(WIDTH + 150, 300 , -6, 0, -0.03, hamburgerTextures),
-  new Food(WIDTH + 150, 300 , -6, 0, -0.03, hamburgerTextures),
+  new Food(-100, 500, 8, -5, 0.05, foodTextures[0]),
+  new Food(WIDTH + 150, 300 , -6, 0, -0.03, foodTextures[1]),
+  new Food(WIDTH + 150, 300 , -6, 0, -0.03, foodTextures[1]),
+  new Food(WIDTH + 150, 300 , -6, 0, -0.03, foodTextures[1]),
+  new Food(WIDTH + 150, 300 , -6, 0, -0.03, foodTextures[1]),
 ];
 
 function randomIntegerGenerator(min, max) {
@@ -174,7 +181,8 @@ function menuLoop() {
       let xMomentum = Math.pow(-1, side) * randomDoubleGenerator(MINXMOMENTUM, MAXXMOMENTUM);
       let yMomentum = randomDoubleGenerator(MINYMOMENTUM, MAXYMOMENTUM);
       let angularMomentum = randomDoubleGenerator(- maxAngularMomentum, maxAngularMomentum);
-      food.recycle(x, y, xMomentum, yMomentum, angularMomentum, hamburgerTextures);
+      let foodType = randomIntegerGenerator(0, foodTextures.length - 1)
+      food.recycle(x, y, xMomentum, yMomentum, angularMomentum, foodTextures[foodType]);
     }
     food.update();
   });
