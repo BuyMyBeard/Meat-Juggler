@@ -32,7 +32,7 @@ class Food {
     this.yMomentum = yMomentum;
     this.angularMomentum = angularMomentum;
     this.sprite.rotation = 0;
-    this.indicator = new Indicator(textures[0]);
+    this.indicator = new Indicator(this.textures[0]);
     game.stage.addChild(this.sprite);
     game.stage.addChild(this.indicator.sprite);
 
@@ -59,7 +59,6 @@ class Food {
     this.state = -1;
     this.sprite.rotation = 0;
     this.framesCooked = 0;
-    console.log("disabled");
   }
   updateIndicator() {
     if (this.sprite.y < 0) {
@@ -166,6 +165,7 @@ class Food {
   }
 }
 
+
 class Indicator {
   constructor(texture) {
     this.sprite = new PIXI.Sprite(texture);
@@ -179,7 +179,7 @@ class BBQ {
   hitboxYStart = HEIGHT - 180;
   hitboxYEnd = HEIGHT - 100;
   constructor(x) {
-    this.sprite = new PIXI.Sprite.from('./images/BBQ-grill2.png');
+    this.sprite = new PIXI.Sprite.from('./images/BBQ_grill.png');
     this.sprite.anchor.set(0, 1);
     this.sprite.position.set(x, HEIGHT);
     game.stage.addChild(this.sprite);
@@ -212,7 +212,7 @@ class BBQ {
 class Plate {
   
   constructor(x, y) {
-    this.sprite = new PIXI.Sprite.from("./images/meatslab.jpg");
+    this.sprite = new PIXI.Sprite.from("./images/unused/meatslab.jpg");
     this.sprite.position.set(x, y);
     this.sprite.width = 100;
     this.sprite.height = 100;
@@ -247,7 +247,7 @@ class Lives {
   }  
   reset() {
     this.count = this.hearts.length;
-    for (let heart of hearts) {
+    for (let heart of this.hearts) {
       heart.alpha = 1;
     }
   }

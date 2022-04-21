@@ -34,7 +34,7 @@ let music = {
     }
   })
 }
-function playMainSong() {
+function playGameSong() {
   music.flippinMeat.play('intro');
   music.flippinMeat.once('end', () => {
     music.flippinMeat.play('mainLoop');
@@ -46,7 +46,7 @@ function endSong() {
   music.flippinMeat.once('end', () => {
     music.flippinMeat.stop();
     music.flippinMeat.play('defeat');
-  }); 
+  });
 }
 
 
@@ -111,7 +111,7 @@ function initializeFoodOnClickEvent(food) {
         food.angularMomentum += rotationIncrease;
       }
     }
-      else {
+    else {
       food.xMomentum += momentumScaling + xBaseIncrease;
       food.angularMomentum += rotationIncrease;
     }
@@ -146,15 +146,13 @@ for (let t of debugInfo) {
 
 bbq = new BBQ(-1000);
 plate = new Plate(0, -1000);
-//bbq = new BBQ(300);
-//plate = new Plate(WIDTH - 200, HEIGHT - 150);
 
 let foodArray = [
   new Food(-100, 500, 8, -5, 0.05, foodTextures[0]),
-  new Food(WIDTH + 150, 300 , -6, 0, -0.03, foodTextures[1]),
-  new Food(WIDTH + 150, 300 , -6, 0, -0.03, foodTextures[1]),
-  new Food(WIDTH + 150, 300 , -6, 0, -0.03, foodTextures[1]),
-  new Food(WIDTH + 150, 300 , -6, 0, -0.03, foodTextures[1]),
+  new Food(WIDTH + 150, 300, -6, 0, -0.03, foodTextures[1]),
+  new Food(WIDTH + 150, 300, -6, 0, -0.03, foodTextures[1]),
+  new Food(WIDTH + 150, 300, -6, 0, -0.03, foodTextures[1]),
+  new Food(WIDTH + 150, 300, -6, 0, -0.03, foodTextures[1]),
 ];
 
 function randomIntegerGenerator(min, max) {
@@ -163,49 +161,48 @@ function randomIntegerGenerator(min, max) {
 function randomDoubleGenerator(min, max) {
   return Math.random() * (max - min) + min;
 }
-game.ticker.add(delta => menuLoop(delta));
-function menuLoop() {
-  foodArray.forEach((food) => {
-    const MINX = -200;
-    const MAXX = -100;
-    const MINY = -100;
-    const MAXY = HEIGHT;
-    const MINXMOMENTUM = 4;
-    const MAXXMOMENTUM = 8;
-    const MINYMOMENTUM = -5;
-    const MAXYMOMENTUM = 0;
-    if (food.state == -1) {
-      let side = randomIntegerGenerator(0, 1); // 0: left, 1: right
-      let x = Math.pow(-1, side) * randomDoubleGenerator(MINX, MAXX) + side * WIDTH;
-      let y = randomDoubleGenerator(MINY, MAXY);
-      let xMomentum = Math.pow(-1, side) * randomDoubleGenerator(MINXMOMENTUM, MAXXMOMENTUM);
-      let yMomentum = randomDoubleGenerator(MINYMOMENTUM, MAXYMOMENTUM);
-      let angularMomentum = randomDoubleGenerator(- maxAngularMomentum, maxAngularMomentum);
-      let foodType = randomIntegerGenerator(0, foodTextures.length - 1)
-      food.recycle(x, y, xMomentum, yMomentum, angularMomentum, foodTextures[foodType]);
-    }
-    food.update();
-  });
+function menuSpawnFoodRandomly(food) {
+  const MINX = -200;
+  const MAXX = -100;
+  const MINY = -100;
+  const MAXY = HEIGHT;
+  const MINXMOMENTUM = 4;
+  const MAXXMOMENTUM = 8;
+  const MINYMOMENTUM = -5;
+  const MAXYMOMENTUM = 0;
+
+  let side = randomIntegerGenerator(0, 1); // 0: left, 1: right
+  let x = Math.pow(-1, side) * randomDoubleGenerator(MINX, MAXX) + side * WIDTH;
+  let y = randomDoubleGenerator(MINY, MAXY);
+  let xMomentum = Math.pow(-1, side) * randomDoubleGenerator(MINXMOMENTUM, MAXXMOMENTUM);
+  let yMomentum = randomDoubleGenerator(MINYMOMENTUM, MAXYMOMENTUM);
+  let angularMomentum = randomDoubleGenerator(- maxAngularMomentum, maxAngularMomentum);
+  let foodType = randomIntegerGenerator(0, foodTextures.length - 1)
+  food.recycle(x, y, xMomentum, yMomentum, angularMomentum, foodTextures[foodType]);
+
 }
 
 for (let food of foodArray) {
   initializeFoodOnClickEvent(food);
 }
 
-// game.ticker.add(delta => gameLoop(delta));
 function gameLoop() {
   for (let food of foodArray) {
     food.update();
-    cookingPosition = bbq.hitboxCollided(food.sprite.position.x, food.sprite.position.y)
-    if (cookingPosition != -1) {
-      if (cookingPosition == -2) {
-        food.bounce();
-      } else {
-        food.startCooking(cookingPosition);
+    if (food.state == -1 && !food.sprite.interactive) { 
+      menuSpawnFoodRandomly(food);
+    } else {
+      cookingPosition = bbq.hitboxCollided(food.sprite.position.x, food.sprite.position.y)
+      if (cookingPosition != -1) {
+        if (cookingPosition == -2) {
+          food.bounce();
+        } else {
+          food.startCooking(cookingPosition);
+        }
       }
-    }
-    if (plate.hitboxCollided(food.sprite.x, food.sprite.y)) {
-      food.collect();
+      if (plate.hitboxCollided(food.sprite.x, food.sprite.y)) {
+        food.collect();
+      }
     }
   }
 
@@ -218,8 +215,31 @@ function gameLoop() {
   }
 }
 
-
-lives = new Lives(hamburgerTextures[0], 3, 30);
+heart = foodTextures[0]
+lives = new Lives(heart[1], 3, 30);
 lives.disable();
 
+function loadLevel1() {
+  foodArray.forEach((food) => {
+    food.disable();
+    food.sprite.interactive = true;
+  });
+  bbq.sprite.x = (300);
+  plate.sprite.position.set(WIDTH - 200, HEIGHT - 150);
+  lives.reset(); 
+  playGameSong();
+}
+function getFirstUnusedFood() {
+  for (food of foodArray) {
+    if (food.state == -1) {
+      return food;
+    }
+  }
+  throw "no food unused";
+}
+
+game.ticker.add(delta => gameLoop(delta));
+music.mainMenuSong.play();
 //potential bug: package-lock.json 5000 lines limit (?)
+//bug 1: shows wrong indicator on food (only on my other computer for some reason)
+//implementation of pause with game.ticker.speed = 0;
