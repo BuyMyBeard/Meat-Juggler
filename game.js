@@ -20,6 +20,37 @@ let style = new PIXI.TextStyle({
   fill: '#FFFFFF',
   stroke: '#EEEEEE'
 });
+let music = {
+  mainMenuSong: new Howl({
+    src: ['./music/Main-Menu.wav'],
+    loop: true
+  }),
+  flippinMeat: new Howl({
+    src: ['./music/Flippin-Meat.wav'],
+    sprite: {
+      'intro': [0, 8000],
+      'mainLoop': [8000, 8000, true],
+      'defeat': [16000, 5000]
+    }
+  })
+}
+function playMainSong() {
+  music.flippinMeat.play('intro');
+  music.flippinMeat.once('end', () => {
+    music.flippinMeat.play('mainLoop');
+  });
+}
+
+playMainSong();
+
+function end() {
+  music.flippinMeat.once('end', () => {
+    music.flippinMeat.stop();
+    music.flippinMeat.play('defeat');
+  }); 
+}
+
+
 
 let pointerPosition;
 game.stage.interactive = true;
@@ -91,7 +122,6 @@ function initializeFoodOnClickEvent(food) {
     }
   });
 }
-
 
 //debug Info
 let infoCount = 10;
