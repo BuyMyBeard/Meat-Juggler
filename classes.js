@@ -46,6 +46,7 @@ class Food {
     this.yMomentum = yMomentum;
     this.angularMomentum = angularMomentum;
     this.sprite.alpha = 1;
+    this.indicator.sprite.texture = textures[0]
   }
   disable() {
     this.sprite.position.set(-400, 0);

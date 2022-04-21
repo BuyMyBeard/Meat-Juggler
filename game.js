@@ -11,8 +11,6 @@ let game = new application({
 document.body.appendChild(game.view);
 game.renderer.view.style.position = 'absolute';
 const GRAPHICS = PIXI.Graphics;
-let ticker = PIXI.Ticker.shared;
-const FPS = Math.round(ticker.FPS);
 //debug text
 let style = new PIXI.TextStyle({
   fontFamily: 'Arial',
@@ -186,7 +184,9 @@ for (let food of foodArray) {
   initializeFoodOnClickEvent(food);
 }
 
+let frame = 0;
 function gameLoop() {
+  frame++;
   for (let food of foodArray) {
     food.update();
     if (food.state == -1 && !food.sprite.interactive) { 
@@ -227,6 +227,7 @@ function loadLevel1() {
   bbq.sprite.x = (300);
   plate.sprite.position.set(WIDTH - 200, HEIGHT - 150);
   lives.reset(); 
+  music.mainMenuSong.stop();
   playGameSong();
 }
 function getFirstUnusedFood() {
@@ -240,6 +241,11 @@ function getFirstUnusedFood() {
 
 game.ticker.add(delta => gameLoop(delta));
 music.mainMenuSong.play();
+document.addEventListener('keydown', (key) => {
+  if (key.key == 'Escape') {
+    game.ticker.deltaTime = 10;
+    console.log("dkdk")
+  }
+});
 //potential bug: package-lock.json 5000 lines limit (?)
-//bug 1: shows wrong indicator on food (only on my other computer for some reason)
 //implementation of pause with game.ticker.speed = 0;
