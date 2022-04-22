@@ -13,6 +13,7 @@ const MAXROTATIONINCREASE = 0.1;
 const MAXDELTAX = 50;
 maxAngularMomentum = 0.1; 
 let lives;
+let foodUsed = 0;
 class Food {
   isCooking = false;
   cookingPositionIndex = -1;
@@ -35,7 +36,7 @@ class Food {
     this.indicator = new Indicator(this.textures[0]);
     game.stage.addChild(this.sprite);
     game.stage.addChild(this.indicator.sprite);
-
+    foodUsed++;
   }
   recycle(x, y, xMomentum, yMomentum, angularMomentum, textures) {
     this.textures = textures;
@@ -46,10 +47,11 @@ class Food {
     this.yMomentum = yMomentum;
     this.angularMomentum = angularMomentum;
     this.sprite.alpha = 1;
-    this.indicator.sprite.texture = textures[0]
+    this.indicator.sprite.texture = textures[0];
+    foodUsed++;
   }
   disable() {
-    this.sprite.position.set(-400, 0);
+    this.sprite.position.set(-500, 500);
     this.sprite.xMomentum = 0;
     this.sprite.yMomentum = 0;
     this.sprite.alpha = 0;
@@ -60,6 +62,7 @@ class Food {
     this.state = -1;
     this.sprite.rotation = 0;
     this.framesCooked = 0;
+    foodUsed--;
   }
   updateIndicator() {
     if (this.sprite.y < 0) {

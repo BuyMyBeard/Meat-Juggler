@@ -11,6 +11,7 @@ let game = new application({
 document.body.appendChild(game.view);
 game.renderer.view.style.position = 'absolute';
 const GRAPHICS = PIXI.Graphics;
+const FPS = Math.round(game.ticker.FPS);
 //debug text
 let style = new PIXI.TextStyle({
   fontFamily: 'Arial',
@@ -177,7 +178,22 @@ function menuSpawnFoodRandomly(food) {
   let angularMomentum = randomDoubleGenerator(- maxAngularMomentum, maxAngularMomentum);
   let foodType = randomIntegerGenerator(0, foodTextures.length - 1)
   food.recycle(x, y, xMomentum, yMomentum, angularMomentum, foodTextures[foodType]);
+}
+function spawnFoodAbove(food) {
+  const MINX = 0;
+  const MAXX = WIDTH;
+  const MINY = -500;
+  const MAXY = -200;
+  const MINXMOMENTUM = -4;
+  const MAXXMOMENTUM = 4;
+  const YMOMENTUM = 0;
 
+  let x = randomDoubleGenerator(MINX, MAXX);
+  let y = randomDoubleGenerator(MINY, MAXY);
+  let xMomentum = randomDoubleGenerator(MINXMOMENTUM, MAXXMOMENTUM);
+  let angularMomentum = randomDoubleGenerator(- maxAngularMomentum, maxAngularMomentum);
+  let foodType = randomIntegerGenerator(0, foodTextures.length - 1)
+  food.recycle(x, y, xMomentum, YMOMENTUM, angularMomentum, foodTextures[foodType]);
 }
 
 for (let food of foodArray) {
@@ -189,22 +205,54 @@ function gameLoop() {
   frame++;
   for (let food of foodArray) {
     food.update();
-    if (food.state == -1 && !food.sprite.interactive) { 
-      menuSpawnFoodRandomly(food);
-    } else {
-      cookingPosition = bbq.hitboxCollided(food.sprite.position.x, food.sprite.position.y)
-      if (cookingPosition != -1) {
-        if (cookingPosition == -2) {
-          food.bounce();
-        } else {
-          food.startCooking(cookingPosition);
-        }
-      }
-      if (plate.hitboxCollided(food.sprite.x, food.sprite.y)) {
-        food.collect();
+    cookingPosition = bbq.hitboxCollided(food.sprite.position.x, food.sprite.position.y)
+    if (cookingPosition != -1) {
+      if (cookingPosition == -2) {
+        food.bounce();
+      } else {
+        food.startCooking(cookingPosition);
       }
     }
+    if (plate.hitboxCollided(food.sprite.x, food.sprite.y)) {
+      food.collect();
+    }
   }
+}
+
+function spawnFood() {
+  const SECONDSBETWEENSPAWNS = 5;
+  if (frame % (FPS * SECONDSBETWEENSPAWNS) == 90 && foodUsed < foodArray.length) {
+    spawnFoodAbove(getFirstUnusedFood());
+    console.log('working');
+  }
+}
+
+function menuLoop() {
+  for (let food of foodArray) {
+    food.update();
+    if (food.state == -1) { 
+      menuSpawnFoodRandomly(food);
+    }
+  }
+}
+gameState = 0 // -1: pause   0: menu   1: game
+
+function updateLoop() {
+  switch (gameState) {
+    case 0: 
+      menuLoop();
+      break;
+
+    case 1:
+      gameLoop();
+      spawnFood();
+      break;
+
+    default:
+      break;
+  }
+
+
 
   debugInfo[0].text = `meat position : (${Math.round(foodArray[0].sprite.x)}, ${Math.round(foodArray[0].sprite.y)})`;
   debugInfo[1].text = `meat momentum : (${foodArray[0].xMomentum.toFixed(1)}, ${foodArray[0].yMomentum.toFixed(1)})`;
@@ -213,6 +261,7 @@ function gameLoop() {
   } else {
     debugInfo[2].text = `cursor position : (${Math.round(pointerPosition.x)}, ${Math.round(pointerPosition.y)})`;
   }
+  debugInfo[3].text = `food used : ${foodUsed} `;
 }
 
 heart = foodTextures[0]
@@ -223,6 +272,8 @@ function loadLevel1() {
   foodArray.forEach((food) => {
     food.disable();
     food.sprite.interactive = true;
+    frame = 0;
+    gameState = 1;
   });
   bbq.sprite.x = (300);
   plate.sprite.position.set(WIDTH - 200, HEIGHT - 150);
@@ -241,28 +292,30 @@ function getFirstUnusedFood() {
 
 blurFilter = new PIXI.filters.BlurFilter();
 
-
-game.ticker.add(delta => gameLoop(delta));
+game.ticker.add(delta => updateLoop(delta));
 music.mainMenuSong.play();
+
 document.addEventListener('keydown', (key) => {
-  if (key.key == 'Escape') {
-    if (game.ticker.started) {
+  if (key.key == 'p') {
+    if (gameState == 1) {
+      gameState = -1;
       foodArray.forEach((food) => {
         food.sprite.filters = [blurFilter];
-        console.log(food.sprite.filters);
+        food.indicator.sprite.filters = [blurFilter];                    
       });
-      game.ticker.stop();
-    } else {
+      bbq.sprite.blurFilter = [blurFilter];
+      plate.sprite.blurFilter = [blurFilter];
+    } else if (gameState == -1) {
+      gameState = 1;
       foodArray.forEach((food) => {
         food.sprite.filters = null;
-        console.log(food.sprite.filters);
-
+        food.indicator.sprite.filters = null;
       });
-      game.ticker.start();
+      bbq.sprite.blurFilter = null;
+      plate.sprite.blurFilter = null;
     }
   }
 });
-//potential bug: package-lock.json 5000 lines limit (?)
-//implementation of pause with game.ticker.speed = 0;
 
-//cant get filters to work, ugh this is so frustrating, it was working for a bit a while ago
+//potential bug: package-lock.json 5000 lines limit (?)
+//cant get filters to work, ugh this is so frustrating
