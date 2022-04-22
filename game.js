@@ -220,10 +220,17 @@ function gameLoop() {
 }
 
 function spawnFood() {
-  const SECONDSBETWEENSPAWNS = 5;
-  if (frame % (FPS * SECONDSBETWEENSPAWNS) == 90 && foodUsed < foodArray.length) {
+  if (wave >= currentLevel.length) {
+    wave = 0;
+    frame = 0;
+  }
+  let nextEvent = currentLevel[wave];
+  if (foodUsed = 0) {
+    frame = nextEvent - FPS * 0.5;
+  }
+  if (frame == nextEvent && foodUsed < foodArray.length) {
     spawnFoodAbove(getFirstUnusedFood());
-    console.log('working');
+    wave++;
   }
 }
 
@@ -235,7 +242,7 @@ function menuLoop() {
     }
   }
 }
-gameState = 0 // -1: pause   0: menu   1: game
+gameState = 0 // -1: pause   0: menu   1: game   -2: lose 
 
 function updateLoop() {
   switch (gameState) {
@@ -268,12 +275,26 @@ heart = foodTextures[0]
 lives = new Lives(heart[1], 3, 30);
 lives.disable();
 
+function translateSecondsIntoFrames(array) {
+  newArray = []
+  array.forEach((time) => {
+    newArray.push(time * FPS);
+  });
+  return newArray;
+}
+
+let level1Script=translateSecondsIntoFrames([1, 10, 20, 30, 35, 45, 55, 65, 75, 80]);
+console.log(level1Script);
+let currentLevel;
+let wave;
 function loadLevel1() {
   foodArray.forEach((food) => {
     food.disable();
     food.sprite.interactive = true;
     frame = 0;
+    wave = 0;
     gameState = 1;
+    currentLevel = level1Script;
   });
   bbq.sprite.x = (300);
   plate.sprite.position.set(WIDTH - 200, HEIGHT - 150);

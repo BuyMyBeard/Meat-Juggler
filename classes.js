@@ -245,7 +245,8 @@ class Lives {
     this.count--;
     this.hearts[this.count].alpha = 0;
     if (this.count == 0) {
-      // game over
+      gameState = -2;
+      // lose
       endSong();
     }
   }  
