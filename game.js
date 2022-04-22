@@ -239,13 +239,30 @@ function getFirstUnusedFood() {
   throw "no food unused";
 }
 
+blurFilter = new PIXI.filters.BlurFilter();
+
+
 game.ticker.add(delta => gameLoop(delta));
 music.mainMenuSong.play();
 document.addEventListener('keydown', (key) => {
   if (key.key == 'Escape') {
-    game.ticker.deltaTime = 10;
-    console.log("dkdk")
+    if (game.ticker.started) {
+      foodArray.forEach((food) => {
+        food.sprite.filters = [blurFilter];
+        console.log(food.sprite.filters);
+      });
+      game.ticker.stop();
+    } else {
+      foodArray.forEach((food) => {
+        food.sprite.filters = null;
+        console.log(food.sprite.filters);
+
+      });
+      game.ticker.start();
+    }
   }
 });
 //potential bug: package-lock.json 5000 lines limit (?)
 //implementation of pause with game.ticker.speed = 0;
+
+//cant get filters to work, ugh this is so frustrating, it was working for a bit a while ago
