@@ -22,7 +22,7 @@ let style = new PIXI.TextStyle({
 
 let buttonStyle = new PIXI.TextStyle({
   fontFamily: 'Impact',
-  fontSize: 30,
+  fontSize: 40,
   fill: ['#F08080', '#AA3C3B'],
   stroke: '#000000',
   strokeThickness: 4,
@@ -153,8 +153,13 @@ for (let t of debugInfo) {
   debugPos += 20;
 }
 
-bbq = new BBQ(300);
-plate = new Plate(0, -1000);
+let background = new PIXI.Sprite.from('./images/background_300x400.png');
+background.width = WIDTH;
+background.height = HEIGHT;
+game.stage.addChild(background);
+
+let bbq = new BBQ(-1000);
+let plate = new Plate(0, -1000);
 
 let foodArray = [
   new Food(-100, 500, 8, -5, 0.05, foodTextures[0]),
@@ -348,9 +353,15 @@ document.addEventListener('keydown', (key) => {
     if (gameState == 1) {
       gameState = -1;
       toggleBlur(true);
+      pauseMenuButtons.forEach((button) => {
+        button.display();
+      });
     } else if (gameState == -1) {
       gameState = 1;
       toggleBlur(false);
+      pauseMenuButtons.forEach((button) => {
+        button.hide();
+      });
     }
   }
 });
@@ -362,15 +373,23 @@ function toggleBlur(isEnabled) {
       food.sprite.filters = [blurFilter];
       food.indicator.sprite.filters = [blurFilter];                    
     });
-    bbq.sprite.blurFilter = [blurFilter];
-    plate.sprite.blurFilter = [blurFilter];
+    lives.hearts.forEach((heart) => {
+      heart.filters = [blurFilter];
+    });
+    bbq.sprite.filters = [blurFilter];
+    plate.sprite.filters = [blurFilter];
+    background.filters = [blurFilter];
   } else { 
     foodArray.forEach((food) => {
       food.sprite.filters = null;
       food.indicator.sprite.filters = null;
     });
-    bbq.sprite.blurFilter = null;
-    plate.sprite.blurFilter = null;
+    lives.hearts.forEach((heart) => {
+      heart.filters = null;
+    });
+    bbq.sprite.filters = null;
+    plate.sprite.filters = null;
+    background.filters = null;
   }
 }
 function fixBBQ(cookingPos) {
@@ -395,7 +414,37 @@ function showHitboxes() {
     boxes.push(box1);
   }
 }
-buttonTexture = new PIXI.Texture.from('./images/button.png')
-button1 = new Button(WIDTH / 2, HEIGHT / 2, buttonTexture, "Play", buttonStyle);
+mainMenuButtons = [
+  new Button(WIDTH / 2, HEIGHT / 2, "Play", buttonStyle, false),
+  new Button(WIDTH / 2, HEIGHT / 2 + 120, "How to play", buttonStyle, false),
+  new Button(WIDTH / 2, HEIGHT / 2 + 240, "Credits", buttonStyle, false)
+];
+pauseMenuButtons = [
+  new Button(WIDTH / 2, HEIGHT / 2 - 60, "Resume", buttonStyle, true),
+  new Button(WIDTH / 2, HEIGHT / 2 + 60, "Go back to Main Menu", buttonStyle, true)
+];
+winMenuButtons = [
+  new Button(WIDTH / 2, HEIGHT / 2, "Play next level", buttonStyle, true),
+  new Button(WIDTH / 2, HEIGHT / 2, "Retry level", buttonStyle, true),
+  new Button(WIDTH / 2, HEIGHT / 2 + 120, "Go back to Main Menu", buttonStyle, true)
+];
+loseMenuButtons = [
+  new Button(WIDTH / 2, HEIGHT / 2 - 60, "Retry level", buttonStyle, true),
+  new Button(WIDTH / 2, HEIGHT / 2 + 60, "Go back to Main Menu", buttonStyle, true)
+];
+mainMenuButtons[0].sprite.on('pointerdown', () => {
+  loadLevel1();
+  mainMenuButtons.forEach((button) => {
+    button.hide();
+  });
+});
+
+pauseMenuButtons[0].sprite.on('pointerdown', () => {
+  gameState = 1;
+  toggleBlur(false);
+  pauseMenuButtons.forEach((button) => {
+    button.hide();
+  });
+});
 
 //potential bug: package-lock.json 5000 lines limit (?)

@@ -228,7 +228,7 @@ class BBQ {
 class Plate {
   
   constructor(x, y) {
-    this.sprite = new PIXI.Sprite.from("./images/unused/meatslab.jpg");
+    this.sprite = new PIXI.Sprite.from("./images/plate_32x32.png");
     this.sprite.position.set(x, y);
     this.sprite.width = 100;
     this.sprite.height = 100;
@@ -276,8 +276,8 @@ class Lives {
 }
 class Button {
   hiddenOffset = 1000;
-  constructor(x, y, texture, text, textStyle) {
-    this.sprite = new PIXI.Sprite(texture);
+  constructor(x, y, text, textStyle, hidden) {
+    this.sprite = new PIXI.Sprite.from('./images/button.png');
     this.sprite.anchor.set(0.5, 0.5);
     this.sprite.position.set(x, y);
     this.sprite.interactive = true;
@@ -286,5 +286,18 @@ class Button {
     this.text.anchor.set(0.5, 0.5);
     this.text.position.set(x, y);
     game.stage.addChild(this.text);
+    this.displayX = x;
+    this.hiddenX = x + this.hiddenOffset;
+    if (hidden) {
+      this.hide()
+    }
+  }
+  hide() {
+    this.sprite.x = this.hiddenX;
+    this.text.x = this.hiddenX;
+  }
+  display() {
+    this.sprite.x = this.displayX;
+    this.text.x = this.displayX;
   }
 }
