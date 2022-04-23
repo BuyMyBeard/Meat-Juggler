@@ -85,9 +85,12 @@ foodTextures = [
   generateTextures('steak', './spritesheets/steak.png', 32 * 4, 6)
 ]
 
-
+const COOLDOWN = 30;
 function initializeFoodOnClickEvent(food) {
   food.sprite.on('pointerdown', () => {
+    if (food.cooldown > 0) { console.log(food.cooldown); return 0; }
+    food.cooldown += COOLDOWN;
+    console.log(food.cooldown);
     if (food.isCooking) {
       bbq.stopCooking(food.stopCooking());
     }
@@ -137,20 +140,6 @@ function initializeFoodOnClickEvent(food) {
       food.angularMomentum = - food.maxAngularMomentum;
     }
   });
-}
-
-//debug Info
-let infoCount = 10;
-let debugInfo = new Array();
-for (let i = 0; i < infoCount; i++) {
-  debugInfo[i] = new PIXI.Text("", style);
-}
-let debugPos = 0;
-for (let t of debugInfo) {
-  game.stage.addChild(t);
-  t.anchor.x = 1;
-  t.position.set(WIDTH - 30, debugPos);
-  debugPos += 20;
 }
 
 let background = new PIXI.Sprite.from('./images/background_300x400.png');
@@ -257,7 +246,7 @@ function menuLoop() {
     }
   }
 }
-gameState = 0 // -1: pause   0: menu   1: game   -2: lose 
+gameState = 0 // -1: pause   0: menu   1: game   -2: lose   2: win
 
 function updateLoop() {
   switch (gameState) {
@@ -270,16 +259,7 @@ function updateLoop() {
       spawnFood();
       break;
 
-    case -2: 
-    //defeat screen
-    foodArray.forEach((food) => {
-      food.disable();
-      food.sprite.interactive = false;
-    });
-    frame = 0;
-    wave = 0;
-    gameState = 0;
-    currentLevel = level1Script;
+    
 
     default:
       break;
@@ -310,15 +290,15 @@ function translateSecondsIntoFrames(array) {
   return newArray;
 }
 
-
-
 let level1Script=translateSecondsIntoFrames([1, 10, 20, 30, 35, 45, 55, 65, 75, 80]);
 console.log(level1Script);
 let currentLevel;
 let wave;
 let foodServed;
 let foodGoal;
-function loadLevel1() {
+
+
+function loadLevel(level) {
   foodArray.forEach((food) => {
     food.disable();
     food.sprite.interactive = true;
@@ -328,12 +308,25 @@ function loadLevel1() {
   frame = 0;
   wave = 0;
   gameState = 1;
-  currentLevel = level1Script;
+  currentLevel = level;
   bbq.sprite.x = (300);
   plate.sprite.position.set(WIDTH - 200, HEIGHT - 150);
   lives.reset(); 
   music.mainMenuSong.stop();
   playGameSong();
+  mainMenuButtons.forEach((button) => {
+    button.hide();
+  });
+  pauseMenuButtons.forEach((button) => {
+    button.hide();
+  });
+  loseMenuButtons.forEach((button) => {
+    button.hide();
+  });
+  winMenuButtons.forEach((button) => {
+    button.hide();
+  });
+  toggleBlur(false);
 }
 function getFirstUnusedFood() {
   for (food of foodArray) {
@@ -420,11 +413,12 @@ mainMenuButtons = [
   new Button(WIDTH / 2, HEIGHT / 2 + 240, "Credits", buttonStyle, false)
 ];
 pauseMenuButtons = [
-  new Button(WIDTH / 2, HEIGHT / 2 - 60, "Resume", buttonStyle, true),
-  new Button(WIDTH / 2, HEIGHT / 2 + 60, "Go back to Main Menu", buttonStyle, true)
+  new Button(WIDTH / 2, HEIGHT / 2 - 120, "Resume", buttonStyle, true),
+  new Button(WIDTH / 2, HEIGHT / 2, "Retry level", buttonStyle, true),
+  new Button(WIDTH / 2, HEIGHT / 2 + 120, "Go back to Main Menu", buttonStyle, true)
 ];
 winMenuButtons = [
-  new Button(WIDTH / 2, HEIGHT / 2, "Play next level", buttonStyle, true),
+  new Button(WIDTH / 2, HEIGHT / 2 -120, "Play next level", buttonStyle, true),
   new Button(WIDTH / 2, HEIGHT / 2, "Retry level", buttonStyle, true),
   new Button(WIDTH / 2, HEIGHT / 2 + 120, "Go back to Main Menu", buttonStyle, true)
 ];
@@ -432,13 +426,16 @@ loseMenuButtons = [
   new Button(WIDTH / 2, HEIGHT / 2 - 60, "Retry level", buttonStyle, true),
   new Button(WIDTH / 2, HEIGHT / 2 + 60, "Go back to Main Menu", buttonStyle, true)
 ];
+
+// Play
 mainMenuButtons[0].sprite.on('pointerdown', () => {
-  loadLevel1();
+  loadLevel(level1Script);
   mainMenuButtons.forEach((button) => {
     button.hide();
   });
 });
 
+// Resume
 pauseMenuButtons[0].sprite.on('pointerdown', () => {
   gameState = 1;
   toggleBlur(false);
@@ -447,4 +444,76 @@ pauseMenuButtons[0].sprite.on('pointerdown', () => {
   });
 });
 
+// Retry
+let retryButtons = [pauseMenuButtons[1], winMenuButtons[1], loseMenuButtons[0]];
+retryButtons.forEach((button) => {
+  button.sprite.on('pointerdown', () => {
+    loadLevel(currentLevel);
+  });
+});
+
+// Go back to Main Menu
+let goBackToMenuButtons = [pauseMenuButtons[2], winMenuButtons[2], loseMenuButtons[1]];
+goBackToMenuButtons.forEach((button) => {
+  button.sprite.on('pointerdown', () => {
+    loadMainMenu();
+  });
+})
+function loadMainMenu() {
+  toggleBlur(false);
+  gameState = 0;
+  foodArray.forEach((food) => {
+    food.disable();
+    food.sprite.interactive = false;
+  })
+  mainMenuButtons.forEach((button) => {
+    button.display();
+  });
+  pauseMenuButtons.forEach((button) => {
+    button.hide();
+  });
+  loseMenuButtons.forEach((button) => {
+    button.hide();
+  });
+  winMenuButtons.forEach((button) => {
+    button.hide();
+  });
+  bbq.hide();
+  plate.hide();
+  lives.disable();
+}
+
+function loadloseMenu() {
+  loseMenuButtons.forEach((button) => {
+    button.display();
+  });
+  foodArray.forEach((food) => {
+    food.sprite.interactive = false;
+  })
+  gameState = -2;
+}
+
+function loadWinMenu() {
+  winMenuButtons.forEach((button) => {
+    button.display();
+  });
+  foodArray.forEach((food) => {
+    food.sprite.interactive = false;
+  })
+  gameState = 2;
+}
+
+//debug Info
+let infoCount = 10;
+let debugInfo = new Array();
+for (let i = 0; i < infoCount; i++) {
+  debugInfo[i] = new PIXI.Text("", style);
+}
+let debugPos = 0;
+for (let t of debugInfo) {
+  game.stage.addChild(t);
+  t.anchor.x = 1;
+  t.position.set(WIDTH - 30, debugPos);
+  debugPos += 20;
+}
 //potential bug: package-lock.json 5000 lines limit (?)

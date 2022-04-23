@@ -22,6 +22,7 @@ class Food {
   fadePerTick = -0.03;
   framesCooked = 0;
   state = 1; // 1: raw   2: mid   3: done   4: well done   4: overcooked   5: burning   -1 = unused
+  cooldown = 0;
   
   constructor(x, y, xMomentum, yMomentum, angularMomentum, textures) {
     this.textures = textures;
@@ -51,7 +52,7 @@ class Food {
     foodUsed++;
   }
   disable() {
-    this.sprite.position.set(-500, 500);
+    this.sprite.position.set(-2000, 1000);
     this.sprite.xMomentum = 0;
     this.sprite.yMomentum = 0;
     this.sprite.alpha = 0;
@@ -66,6 +67,7 @@ class Food {
     this.state = -1;
     this.sprite.rotation = 0;
     this.framesCooked = 0;
+    this.indicator.hide();
     foodUsed--;
   }
   updateIndicator() {
@@ -143,6 +145,7 @@ class Food {
       }
       this.updateIndicator();
       this.updateMomentum();
+      if (this.cooldown > 0) { this.cooldown--; }
     }
   }
   startCooking(cookingPosition) {
@@ -172,25 +175,28 @@ class Food {
       foodServed++;
     }
     if (foodServed >= foodGoal && !this.isFadingOut) {
-      // win
-      console.log("win");
+      loadWinMenu();
     }
     this.isFadingOut = true;
     this.isCollected = true;
-    
   }
 }
 
 
 class Indicator {
+hiddenX = -1000;
   constructor(texture) {
     this.sprite = new PIXI.Sprite(texture);
     this.sprite.anchor.set(0.5, 0.5);
     this.sprite.position.set(-200, 60);
   }
+  hide() {
+    this.sprite.x = this.hiddenX;
+  }
 }
 class BBQ {
   width = 512;
+  hiddenX = -2000;
   isBusy = [false, false, false];
   hitboxYStart = HEIGHT - 140;
   hitboxYEnd = HEIGHT - 100;
@@ -224,9 +230,12 @@ class BBQ {
   stopCooking(index) {
     this.isBusy[index] = false;
   }
+  hide() {
+    this.sprite.x = this.hiddenX;
+  }
 }
 class Plate {
-  
+  hiddenX = -2000;
   constructor(x, y) {
     this.sprite = new PIXI.Sprite.from("./images/plate_32x32.png");
     this.sprite.position.set(x, y);
@@ -239,6 +248,9 @@ class Plate {
     let isWithinHitboxY = y >= this.sprite.position.y && y <= this.sprite.position.y + this.sprite.height;
     if (isWithinHitboxX && isWithinHitboxY) { return true; }
     return false;
+  }
+  hide() {
+    this.x = this.hiddenX;
   }
 }
 class Lives {
@@ -254,12 +266,13 @@ class Lives {
     }
   } 
   lose() {
-    this.count--;
-    this.hearts[this.count].alpha = 0;
-    if (this.count == 0) {
-      gameState = -2;
-      console.log("lose");
-      endSong();
+    if (this.count > 0) {
+      this.count--;
+      this.hearts[this.count].alpha = 0;
+      if (this.count == 0) {
+        endSong();
+        loadloseMenu();
+      }
     }
   }  
   reset() {
@@ -275,7 +288,7 @@ class Lives {
   }
 }
 class Button {
-  hiddenOffset = 1000;
+  hiddenOffset = 2000;
   constructor(x, y, text, textStyle, hidden) {
     this.sprite = new PIXI.Sprite.from('./images/button.png');
     this.sprite.anchor.set(0.5, 0.5);
