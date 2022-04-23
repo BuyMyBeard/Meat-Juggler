@@ -276,17 +276,15 @@ class Lives {
 }
 class Button {
   hiddenOffset = 1000;
-  constructor(x, y, texture) {
-    /*
+  constructor(x, y, texture, text, textStyle) {
     this.sprite = new PIXI.Sprite(texture);
-    this.sprite.anchor.set(0.5,0.5);
-    this.sprite.position.set(x,y);
+    this.sprite.anchor.set(0.5, 0.5);
+    this.sprite.position.set(x, y);
     this.sprite.interactive = true;
-    */
-    this.box1 = new graphics().beginFill(0x333333).drawRect(x,y,128 * 4, 24 * 4).endFill();
-    //game.stage.addChild(this.sprite);
-    game.stage.addChild(this.box1);
-    
+    game.stage.addChild(this.sprite);
+    this.text = new PIXI.Text(text, textStyle);
+    this.text.anchor.set(0.5, 0.5);
+    this.text.position.set(x, y);
+    game.stage.addChild(this.text);
   }
-
 }

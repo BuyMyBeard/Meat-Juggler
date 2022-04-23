@@ -395,7 +395,7 @@ function showHitboxes() {
     boxes.push(box1);
   }
 }
-button1 = new Button(300, 200, 32);
-console.log('slsl');
+buttonTexture = new PIXI.Texture.from('./images/button.png')
+button1 = new Button(WIDTH / 2, HEIGHT / 2, buttonTexture, "Play", buttonStyle);
 
 //potential bug: package-lock.json 5000 lines limit (?)
