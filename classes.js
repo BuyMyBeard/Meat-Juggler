@@ -56,9 +56,10 @@ class Food {
     this.sprite.yMomentum = 0;
     this.sprite.alpha = 0;
     if (this.isCooking) {
-      
+      fixBBQ(this.cookingPositionIndex);
+      this.isCooking = false;
+      this.cookingPositionIndex = -1;
     }
-    this.isCooking = false;
     this.isCollected = false;
     this.isFadingOut = false;
     this.angularMomentum = 0;
@@ -183,7 +184,7 @@ class Indicator {
 class BBQ {
   width = 512;
   isBusy = [false, false, false];
-  hitboxYStart = HEIGHT - 180;
+  hitboxYStart = HEIGHT - 140;
   hitboxYEnd = HEIGHT - 100;
   constructor(x) {
     this.sprite = new PIXI.Sprite.from('./images/BBQ_grill.png');
@@ -195,16 +196,17 @@ class BBQ {
   // if hitbox not encountered, returns -1 instead
   // if hitbox encountered but busy, returns -2 instead
   hitboxCollided(x, y) {
+    let border = 45;
     if (y > this.hitboxYEnd || y < this.hitboxYStart) { return -1; }
-    this.hitboxWidth = this.width / this.isBusy.length;
+    this.hitboxWidth = (this.width - 2 * border) / this.isBusy.length;
     for (let i = 0; i < this.isBusy.length; i++) {
-      let isBiggerThanMinX = x > this.sprite.x + this.hitboxWidth * i;
-      let isSmallerThanMaxX = x <= this.sprite.x + this.hitboxWidth * (i + 1);
+      let isBiggerThanMinX = x > this.sprite.x + border + this.hitboxWidth * i;
+      let isSmallerThanMaxX = x <= this.sprite.x + border + this.hitboxWidth * (i + 1);
       let indexNotBusy = !this.isBusy[i];
       if (isBiggerThanMinX && isSmallerThanMaxX) {
         if (indexNotBusy) {
           this.isBusy[i] = true;
-          return [this.sprite.x + this.hitboxWidth * (i + 0.5), this.hitboxYStart - 1, i];
+          return [this.sprite.x + border + this.hitboxWidth * (i + 0.5), this.hitboxYStart - 1, i];
         }
         return -2;
       }

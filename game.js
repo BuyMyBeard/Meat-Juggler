@@ -10,7 +10,7 @@ let game = new application({
 });
 document.body.appendChild(game.view);
 game.renderer.view.style.position = 'absolute';
-const GRAPHICS = PIXI.Graphics;
+let graphics = PIXI.Graphics;
 const FPS = Math.round(game.ticker.FPS);
 //debug text
 let style = new PIXI.TextStyle({
@@ -143,7 +143,7 @@ for (let t of debugInfo) {
   debugPos += 20;
 }
 
-bbq = new BBQ(-1000);
+bbq = new BBQ(300);
 plate = new Plate(0, -1000);
 
 let foodArray = [
@@ -358,6 +358,29 @@ function toggleBlur(isEnabled) {
     plate.sprite.blurFilter = null;
   }
 }
+function fixBBQ(cookingPos) {
+  bbq.isBusy[cookingPos] = false;
+}
+
+//debugging
+function showHitboxes() {
+  let x = bbq.sprite.x;
+  let width = bbq.width;
+  let border = 40;
+  let hitboxWidth = (width - 2 * border) / 3;
+  let boxes = [];
+  let fill = [0x111111, 0x222222, 0x333333]
+  for (let i = 0; i < 3; i++) {
+    let isBiggerThanMinX = x + border + hitboxWidth * i;
+    let hitboxWidth2 = x + border + hitboxWidth * (i + 1) - isBiggerThanMinX;
+    let box1 = new graphics();
+    box1.beginFill(fill[i]).drawRect(isBiggerThanMinX, bbq.hitboxYStart, hitboxWidth2, bbq.hitboxYEnd - bbq.hitboxYStart).endFill();
+    box1.alpha = 0.9;
+    game.stage.addChild(box1);
+    boxes.push(box1);
+  }
+}
+
+
 
 //potential bug: package-lock.json 5000 lines limit (?)
-//cant get filters to work, ugh this is so frustrating
