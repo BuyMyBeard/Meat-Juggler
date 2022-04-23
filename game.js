@@ -19,6 +19,16 @@ let style = new PIXI.TextStyle({
   fill: '#FFFFFF',
   stroke: '#EEEEEE'
 });
+
+let buttonStyle = new PIXI.TextStyle({
+  fontFamily: 'Impact',
+  fontSize: 30,
+  fill: ['#F08080', '#AA3C3B'],
+  stroke: '#000000',
+  strokeThickness: 4,
+  letterSpacing: 2
+});
+
 let music = {
   mainMenuSong: new Howl({
     src: ['./music/Main-Menu.wav'],
@@ -280,6 +290,7 @@ function updateLoop() {
     debugInfo[2].text = `cursor position : (${Math.round(pointerPosition.x)}, ${Math.round(pointerPosition.y)})`;
   }
   debugInfo[3].text = `food used : ${foodUsed} `;
+  debugInfo[4].text = `food cooked : ${foodServed} / ${foodGoal}`;
 }
 
 heart = foodTextures[0]
@@ -300,10 +311,14 @@ let level1Script=translateSecondsIntoFrames([1, 10, 20, 30, 35, 45, 55, 65, 75, 
 console.log(level1Script);
 let currentLevel;
 let wave;
+let foodServed;
+let foodGoal;
 function loadLevel1() {
   foodArray.forEach((food) => {
     food.disable();
     food.sprite.interactive = true;
+    foodServed = 0;
+    foodGoal = 5;
   });
   frame = 0;
   wave = 0;
@@ -380,7 +395,7 @@ function showHitboxes() {
     boxes.push(box1);
   }
 }
-
-
+button1 = new Button(300, 200, 32);
+console.log('slsl');
 
 //potential bug: package-lock.json 5000 lines limit (?)

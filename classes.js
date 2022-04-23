@@ -168,8 +168,16 @@ class Food {
     this.angularMomentum = 0;
     this.xMomentum = 0;
     this.yMomentum = 0;
+    if (!this.isFadingOut) {
+      foodServed++;
+    }
+    if (foodServed >= foodGoal && !this.isFadingOut) {
+      // win
+      console.log("win");
+    }
     this.isFadingOut = true;
     this.isCollected = true;
+    
   }
 }
 
@@ -250,7 +258,7 @@ class Lives {
     this.hearts[this.count].alpha = 0;
     if (this.count == 0) {
       gameState = -2;
-      // lose
+      console.log("lose");
       endSong();
     }
   }  
@@ -265,4 +273,20 @@ class Lives {
       heart.alpha = 0;
     });
   }
+}
+class Button {
+  hiddenOffset = 1000;
+  constructor(x, y, texture) {
+    /*
+    this.sprite = new PIXI.Sprite(texture);
+    this.sprite.anchor.set(0.5,0.5);
+    this.sprite.position.set(x,y);
+    this.sprite.interactive = true;
+    */
+    this.box1 = new graphics().beginFill(0x333333).drawRect(x,y,128 * 4, 24 * 4).endFill();
+    //game.stage.addChild(this.sprite);
+    game.stage.addChild(this.box1);
+    
+  }
+
 }
