@@ -55,6 +55,9 @@ class Food {
     this.sprite.xMomentum = 0;
     this.sprite.yMomentum = 0;
     this.sprite.alpha = 0;
+    if (this.isCooking) {
+      
+    }
     this.isCooking = false;
     this.isCollected = false;
     this.isFadingOut = false;
@@ -187,7 +190,6 @@ class BBQ {
     this.sprite.anchor.set(0, 1);
     this.sprite.position.set(x, HEIGHT);
     game.stage.addChild(this.sprite);
-    this.hitboxXStart = x;
   }
   // returns an array [cookingPositionX, cookingPositionY, cookingPositionIndex]. 
   // if hitbox not encountered, returns -1 instead
@@ -196,13 +198,13 @@ class BBQ {
     if (y > this.hitboxYEnd || y < this.hitboxYStart) { return -1; }
     this.hitboxWidth = this.width / this.isBusy.length;
     for (let i = 0; i < this.isBusy.length; i++) {
-      let isBiggerThanMinX = x > this.hitboxXStart + this.hitboxWidth * i;
-      let isSmallerThanMaxX = x <= this.hitboxXStart + this.hitboxWidth * (i + 1);
+      let isBiggerThanMinX = x > this.sprite.x + this.hitboxWidth * i;
+      let isSmallerThanMaxX = x <= this.sprite.x + this.hitboxWidth * (i + 1);
       let indexNotBusy = !this.isBusy[i];
       if (isBiggerThanMinX && isSmallerThanMaxX) {
         if (indexNotBusy) {
           this.isBusy[i] = true;
-          return [this.hitboxXStart + this.hitboxWidth * (i + 0.5), this.hitboxYStart - 1, i];
+          return [this.sprite.x + this.hitboxWidth * (i + 0.5), this.hitboxYStart - 1, i];
         }
         return -2;
       }

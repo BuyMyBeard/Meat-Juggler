@@ -225,8 +225,8 @@ function spawnFood() {
     frame = 0;
   }
   let nextEvent = currentLevel[wave];
-  if (foodUsed = 0) {
-    frame = nextEvent - FPS * 0.5;
+  if (foodUsed == 0 && wave > 0) {
+    frame = nextEvent;
   }
   if (frame == nextEvent && foodUsed < foodArray.length) {
     spawnFoodAbove(getFirstUnusedFood());
@@ -254,6 +254,17 @@ function updateLoop() {
       gameLoop();
       spawnFood();
       break;
+
+    case -2: 
+    //defeat screen
+    foodArray.forEach((food) => {
+      food.disable();
+      food.sprite.interactive = false;
+    });
+    frame = 0;
+    wave = 0;
+    gameState = 0;
+    currentLevel = level1Script;
 
     default:
       break;
@@ -283,6 +294,8 @@ function translateSecondsIntoFrames(array) {
   return newArray;
 }
 
+
+
 let level1Script=translateSecondsIntoFrames([1, 10, 20, 30, 35, 45, 55, 65, 75, 80]);
 console.log(level1Script);
 let currentLevel;
@@ -291,11 +304,11 @@ function loadLevel1() {
   foodArray.forEach((food) => {
     food.disable();
     food.sprite.interactive = true;
-    frame = 0;
-    wave = 0;
-    gameState = 1;
-    currentLevel = level1Script;
   });
+  frame = 0;
+  wave = 0;
+  gameState = 1;
+  currentLevel = level1Script;
   bbq.sprite.x = (300);
   plate.sprite.position.set(WIDTH - 200, HEIGHT - 150);
   lives.reset(); 
@@ -311,7 +324,6 @@ function getFirstUnusedFood() {
   throw "no food unused";
 }
 
-blurFilter = new PIXI.filters.BlurFilter();
 
 game.ticker.add(delta => updateLoop(delta));
 music.mainMenuSong.play();
@@ -320,23 +332,32 @@ document.addEventListener('keydown', (key) => {
   if (key.key == 'p') {
     if (gameState == 1) {
       gameState = -1;
-      foodArray.forEach((food) => {
-        food.sprite.filters = [blurFilter];
-        food.indicator.sprite.filters = [blurFilter];                    
-      });
-      bbq.sprite.blurFilter = [blurFilter];
-      plate.sprite.blurFilter = [blurFilter];
+      toggleBlur(true);
     } else if (gameState == -1) {
       gameState = 1;
-      foodArray.forEach((food) => {
-        food.sprite.filters = null;
-        food.indicator.sprite.filters = null;
-      });
-      bbq.sprite.blurFilter = null;
-      plate.sprite.blurFilter = null;
+      toggleBlur(false);
     }
   }
 });
+
+blurFilter = new PIXI.filters.BlurFilter();
+function toggleBlur(isEnabled) {
+  if (isEnabled) {
+    foodArray.forEach((food) => {
+      food.sprite.filters = [blurFilter];
+      food.indicator.sprite.filters = [blurFilter];                    
+    });
+    bbq.sprite.blurFilter = [blurFilter];
+    plate.sprite.blurFilter = [blurFilter];
+  } else { 
+    foodArray.forEach((food) => {
+      food.sprite.filters = null;
+      food.indicator.sprite.filters = null;
+    });
+    bbq.sprite.blurFilter = null;
+    plate.sprite.blurFilter = null;
+  }
+}
 
 //potential bug: package-lock.json 5000 lines limit (?)
 //cant get filters to work, ugh this is so frustrating
