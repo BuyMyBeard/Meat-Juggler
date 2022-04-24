@@ -206,6 +206,9 @@ function loadLevel(levelScript) {
     foodServed = 0;
     foodGoal = 5;
   });
+  menuCloudArray.forEach((cloud) => {
+    cloud.hide();
+  });
   foodUsed = 0;
   frame = 0;
   wave = 0;
@@ -300,7 +303,10 @@ function loadMainMenu() {
   foodArray.forEach((food) => {
     food.disable();
     food.sprite.interactive = false;
-  })
+  });
+  menuCloudArray.forEach((cloud) => {
+    cloud.display();
+  });
   mainMenuButtons.forEach((button) => {
     button.display();
   });
