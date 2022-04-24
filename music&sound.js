@@ -19,13 +19,13 @@ function playGameSong() {
   });
 }
 
-//version 1 (can cause multiple bugs)
+/* version 1 (can cause multiple bugs)
 function endSong() {
   music.flippinMeat.once('end', () => {
     music.flippinMeat.stop();
     music.flippinMeat.play('defeat');
   });
-}
+} */
 //version 2
 function endSong() {
   music.flippinMeat.stop();
