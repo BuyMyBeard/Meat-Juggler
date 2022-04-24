@@ -117,6 +117,7 @@ class Food {
           this.state++;
           this.sprite.texture = this.textures[this.state];
           console.log("fire");
+          sfx.fire.play();
           break;
         
         case BURNED:
@@ -220,6 +221,7 @@ class BBQ {
       if (isBiggerThanMinX && isSmallerThanMaxX) {
         if (indexNotBusy) {
           this.isBusy[i] = true;
+          sfx.grill.play();
           return [this.sprite.x + border + this.hitboxWidth * (i + 0.5), this.hitboxYStart - 1, i];
         }
         return -2;

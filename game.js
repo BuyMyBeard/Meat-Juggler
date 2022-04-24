@@ -29,36 +29,6 @@ let buttonStyle = new PIXI.TextStyle({
   letterSpacing: 2
 });
 
-let music = {
-  mainMenuSong: new Howl({
-    src: ['./music/Main-Menu.wav'],
-    loop: true
-  }),
-  flippinMeat: new Howl({
-    src: ['./music/Flippin-Meat.wav'],
-    sprite: {
-      'intro': [0, 8000],
-      'mainLoop': [8000, 8000, true],
-      'defeat': [16000, 5000]
-    }
-  })
-}
-function playGameSong() {
-  music.flippinMeat.play('intro');
-  music.flippinMeat.once('end', () => {
-    music.flippinMeat.play('mainLoop');
-  });
-}
-
-
-function endSong() {
-  music.flippinMeat.once('end', () => {
-    music.flippinMeat.stop();
-    music.flippinMeat.play('defeat');
-  });
-}
-
-
 
 let pointerPosition;
 game.stage.interactive = true;
@@ -90,6 +60,7 @@ function initializeFoodOnClickEvent(food) {
   food.sprite.on('pointerdown', () => {
     if (food.cooldown > 0) { console.log(food.cooldown); return 0; }
     food.cooldown += COOLDOWN;
+    sfx.squich[randomIntegerGenerator(0,sfx.squich.length-1)].play();
     console.log(food.cooldown);
     if (food.isCooking) {
       bbq.stopCooking(food.stopCooking());
@@ -429,6 +400,7 @@ loseMenuButtons = [
 
 // Play
 mainMenuButtons[0].sprite.on('pointerdown', () => {
+  sfx.button.play();
   loadLevel(level1Script);
   mainMenuButtons.forEach((button) => {
     button.hide();
@@ -437,6 +409,7 @@ mainMenuButtons[0].sprite.on('pointerdown', () => {
 
 // Resume
 pauseMenuButtons[0].sprite.on('pointerdown', () => {
+  sfx.button.play();
   gameState = 1;
   toggleBlur(false);
   pauseMenuButtons.forEach((button) => {
@@ -448,6 +421,7 @@ pauseMenuButtons[0].sprite.on('pointerdown', () => {
 let retryButtons = [pauseMenuButtons[1], winMenuButtons[1], loseMenuButtons[0]];
 retryButtons.forEach((button) => {
   button.sprite.on('pointerdown', () => {
+    sfx.button.play();
     loadLevel(currentLevel);
   });
 });
@@ -456,7 +430,10 @@ retryButtons.forEach((button) => {
 let goBackToMenuButtons = [pauseMenuButtons[2], winMenuButtons[2], loseMenuButtons[1]];
 goBackToMenuButtons.forEach((button) => {
   button.sprite.on('pointerdown', () => {
+    sfx.button.play();
     loadMainMenu();
+    music.flippinMeat.stop();
+    music.mainMenuSong.play();
   });
 })
 function loadMainMenu() {
