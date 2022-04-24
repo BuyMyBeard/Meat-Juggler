@@ -123,6 +123,9 @@ function spawnFoodAbove(food) {
 
 function gameLoop() {
   frame++;
+  gameCloudArray.forEach((cloud) => {
+    cloud.update();
+  });
   for (let food of foodArray) {
     food.update();
     cookingPosition = bbq.hitboxCollided(food.sprite.position.x, food.sprite.position.y)
@@ -209,6 +212,9 @@ function loadLevel(levelScript) {
   menuCloudArray.forEach((cloud) => {
     cloud.hide();
   });
+  gameCloudArray.forEach((cloud) => {
+    cloud.display();
+  });
   foodUsed = 0;
   frame = 0;
   wave = 0;
@@ -254,7 +260,8 @@ function toggleBlur(isEnabled) {
     });
     bbq.sprite.filters = [blurFilter];
     plate.sprite.filters = [blurFilter];
-    background.filters = [blurFilter];
+    backgroundLayer1.filters = [blurFilter];
+    backgroundLayer2.filters = [blurFilter];
   } else { 
     foodArray.forEach((food) => {
       food.sprite.filters = null;
@@ -265,7 +272,8 @@ function toggleBlur(isEnabled) {
     });
     bbq.sprite.filters = null;
     plate.sprite.filters = null;
-    background.filters = null;
+    backgroundLayer1.filters = null;
+    backgroundLayer2.filters = null;
   }
 }
 
@@ -306,6 +314,9 @@ function loadMainMenu() {
   });
   menuCloudArray.forEach((cloud) => {
     cloud.display();
+  });
+  gameCloudArray.forEach((cloud) => {
+    cloud.hide();
   });
   mainMenuButtons.forEach((button) => {
     button.display();

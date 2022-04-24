@@ -52,13 +52,10 @@ const COOLDOWN = 30;
 
 let menuBackgroundTexture = new PIXI.Texture.from('./images/sky_300x400.png')
 let gameBackgroundTexture = new PIXI.Texture.from('./images/background_300x400.png');
-let background = new PIXI.Sprite(menuBackgroundTexture);
-background.width = WIDTH;
-background.height = HEIGHT;
-game.stage.addChild(background);
-
-let bbq = new BBQ(-1000);
-let plate = new Plate(0, -1000);
+let backgroundLayer1 = new PIXI.Sprite(menuBackgroundTexture);
+backgroundLayer1.width = WIDTH;
+backgroundLayer1.height = HEIGHT;
+game.stage.addChild(backgroundLayer1);
 
 let menuCloudArray = [
   new Cloud(25,25, cloudTextures[0], 2),
@@ -68,6 +65,25 @@ let menuCloudArray = [
   new Cloud(2500,520, cloudTextures[2], 2),
   new Cloud(600,1000,cloudTextures[2], 5)
 ];
+
+let gameCloudArray = [
+  new Cloud(25,25, cloudTextures[4], 1.7),
+  new Cloud(-500,170,cloudTextures[3], 1),
+  new Cloud(300,330,cloudTextures[1], 1.5)
+];
+gameCloudArray.forEach((cloud) => {
+  cloud.hide();
+});
+
+let backgroundLayer2  = new PIXI.Sprite(gameBackgroundTexture);
+backgroundLayer2.width = WIDTH;
+backgroundLayer2.height = HEIGHT;
+game.stage.addChild(backgroundLayer2);
+backgroundLayer2.texture = null;
+
+
+let bbq = new BBQ(-1000);
+let plate = new Plate(0, -1000);
 
 let foodArray = [
   new Food(-100, 500, 8, -5, 0.05, foodTextures[0]),
@@ -145,7 +161,7 @@ loseMenuButtons = [
 mainMenuButtons[0].sprite.on('pointerdown', () => {
   sfx.button.play();
   level = 1;
-  background.texture = gameBackgroundTexture;
+  backgroundLayer2.texture = gameBackgroundTexture;
   loadLevel(levelScripts[level - 1]);
   mainMenuButtons.forEach((button) => {
     button.hide();
@@ -180,7 +196,7 @@ goBackToMenuButtons.forEach((button) => {
     loadMainMenu();
     music.flippinMeat.stop();
     music.mainMenuSong.play();
-    background.texture = menuBackgroundTexture;
+    backgroundLayer2.texture = null;
   });
 })
 
