@@ -8,7 +8,6 @@ let game = new application({
   transparent: false,
   antialias: true,
 });
-// let d = new Dust(PIXI);
 
 document.body.appendChild(game.view);
 game.renderer.view.style.position = 'absolute';

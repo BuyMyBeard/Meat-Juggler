@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "howler": "^2.2.3",
+    "pixi-dust": "^4.5.3",
     "pixi.js": "^6.3.0"
   },
   "devDependencies": {

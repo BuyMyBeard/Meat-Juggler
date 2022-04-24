@@ -68,9 +68,11 @@ function initializeFoodOnClickEvent(food) {
 function randomIntegerGenerator(min, max) {
   return Math.floor(Math.random() * (max + 1 - min) + min);
 }
+
 function randomDoubleGenerator(min, max) {
   return Math.random() * (max - min) + min;
 }
+
 function menuSpawnFoodRandomly(food) {
   const MINX = -200;
   const MAXX = -100;
@@ -90,6 +92,7 @@ function menuSpawnFoodRandomly(food) {
   let foodType = randomIntegerGenerator(0, foodTextures.length - 1)
   food.recycle(x, y, xMomentum, yMomentum, angularMomentum, foodTextures[foodType]);
 }
+
 function spawnFoodAbove(food) {
   const MINX = 0;
   const MAXX = WIDTH;
@@ -163,7 +166,6 @@ function updateLoop() {
     default:
       break;
   }
-  // d.update();
   debugInfo[0].text = `meat position : (${Math.round(foodArray[0].sprite.x)}, ${Math.round(foodArray[0].sprite.y)})`;
   debugInfo[1].text = `meat momentum : (${foodArray[0].xMomentum.toFixed(1)}, ${foodArray[0].yMomentum.toFixed(1)})`;
   if (pointerPosition == undefined) {
@@ -182,7 +184,6 @@ function translateSecondsIntoFrames(array) {
   });
   return newArray;
 }
-
 
 function loadLevel(level) {
   foodArray.forEach((food) => {
@@ -214,6 +215,7 @@ function loadLevel(level) {
   });
   toggleBlur(false);
 }
+
 function getFirstUnusedFood() {
   for (food of foodArray) {
     if (food.state == -1) {
@@ -248,6 +250,7 @@ function toggleBlur(isEnabled) {
     background.filters = null;
   }
 }
+
 function fixBBQ(cookingPos) {
   bbq.isBusy[cookingPos] = false;
 }
