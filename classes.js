@@ -173,7 +173,13 @@ class Food {
     this.xMomentum = 0;
     this.yMomentum = 0;
     if (!this.isFadingOut) {
-      foodServed++;
+      if (this.state == 3 || this.state == 4) {
+        foodServed++;
+        sfx.valid.play();
+      } else {
+        lives.lose();
+        sfx.invalid.play();
+      }  
     }
     if (foodServed >= foodGoal && !this.isFadingOut) {
       loadWinMenu();
@@ -238,30 +244,32 @@ class BBQ {
 }
 class Plate {
   hiddenX = -2000;
+  dimensions = 128;
   constructor(x, y) {
     this.sprite = new PIXI.Sprite.from("./images/plate_32x32.png");
     this.sprite.position.set(x, y);
-    this.sprite.width = 100;
-    this.sprite.height = 100;
     game.stage.addChild(this.sprite);
   }
   hitboxCollided(x, y) {
-    let isWithinHitboxX = x >= this.sprite.position.x && x <= this.sprite.position.x + this.sprite.width;
-    let isWithinHitboxY = y >= this.sprite.position.y && y <= this.sprite.position.y + this.sprite.height;
+    let isWithinHitboxX = x >= this.sprite.position.x && x <= this.sprite.position.x + this.dimensions;
+    let isWithinHitboxY = y >= this.sprite.position.y && y <= this.sprite.position.y + this.dimensions;
     if (isWithinHitboxX && isWithinHitboxY) { return true; }
     return false;
   }
   hide() {
-    this.x = this.hiddenX;
+    this.sprite.x = this.hiddenX;
+  }
+  display() {
+    this.sprite.position.set(WIDTH - 160, HEIGHT - 165);
   }
 }
 class Lives {
-  constructor(texture, count, separation) {
+  constructor(count, separation) {
     this.hearts = [];
     for(let i = 0; i < count; i++) {
-      let heart = new PIXI.Sprite(texture);
+      let heart = new PIXI.Sprite.from('./images/heart_32x32.png');
       heart.position.x = i * separation;
-      heart.scale.set(0.5,0.5)
+      heart.scale.set(0.7,0.7)
       game.stage.addChild(heart);
       this.hearts.push(heart);
       this.count = count;
@@ -314,5 +322,31 @@ class Button {
   display() {
     this.sprite.x = this.displayX;
     this.text.x = this.displayX;
+  }
+}
+class Cloud {
+  hiddenX = 5000;
+  MinX = -1000
+  MaxX = WIDTH + 1000;
+  constructor(x, y, texture, speed) {
+    this.sprite = new PIXI.Sprite(texture);
+    this.sprite.anchor.set(0.5, 0.5);
+    this.sprite.position.set(x, y);
+    game.stage.addChild(this.sprite);
+    this.speed = speed;
+    this.savedPosition = this.sprite.x;
+  }
+  update() {
+    this.sprite.x += this.speed;
+    if (this.sprite.x >= this.MaxX) {
+      this.sprite.x = this.MinX;
+    }
+  }
+  hide() {
+    this.savedPosition = this.sprite.x;
+    this.sprite.x = this.hiddenX;
+  }
+  display() {
+    this.sprite.x = this.savedPosition;
   }
 }

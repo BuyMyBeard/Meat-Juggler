@@ -44,15 +44,30 @@ foodTextures = [
   generateTextures('skewer', './spritesheets/skewer.png', 32 * 4, 6),
   generateTextures('steak', './spritesheets/steak.png', 32 * 4, 6)
 ];
+
+cloudTextures = generateTexturesH('clouds', './spritesheets/clouds_137x86.png',137 * 4, 86 * 4, 5);
+
+
 const COOLDOWN = 30;
 
-let background = new PIXI.Sprite.from('./images/background_300x400.png');
+let menuBackgroundTexture = new PIXI.Texture.from('./images/sky_300x400.png')
+let gameBackgroundTexture = new PIXI.Texture.from('./images/background_300x400.png');
+let background = new PIXI.Sprite(menuBackgroundTexture);
 background.width = WIDTH;
 background.height = HEIGHT;
 game.stage.addChild(background);
 
 let bbq = new BBQ(-1000);
 let plate = new Plate(0, -1000);
+
+let menuCloudArray = [
+  new Cloud(25,25, cloudTextures[0], 2),
+  new Cloud(-500,170,cloudTextures[3], 3),
+  new Cloud(2000,700, cloudTextures[4], 1),
+  new Cloud(300,330,cloudTextures[1], 4),
+  new Cloud(2500,520, cloudTextures[2], 2),
+  new Cloud(600,1000,cloudTextures[2], 5)
+];
 
 let foodArray = [
   new Food(-100, 500, 8, -5, 0.05, foodTextures[0]),
@@ -69,13 +84,16 @@ for (let food of foodArray) {
 let frame = 0;
 gameState = 0 // -1: pause   0: menu   1: game   -2: lose   2: win
 
-heart = foodTextures[0]
-lives = new Lives(heart[1], 3, 30);
+lives = new Lives(3, 40);
 lives.disable();
 
-let level1Script=translateSecondsIntoFrames([1, 10, 20, 30, 35, 45, 55, 65, 75, 80]);
-console.log(level1Script);
-let currentLevel;
+
+let levelScripts = [
+  translateSecondsIntoFrames([1, 10, 20, 30, 35, 45, 55, 65, 75, 80]),
+  translateSecondsIntoFrames([1, 6, 12, 15, 20, 26, 30, 35, 42, 48])
+]
+let level;
+let currentLevelScript;
 let wave;
 let foodServed;
 let foodGoal;
@@ -126,7 +144,9 @@ loseMenuButtons = [
 // Play
 mainMenuButtons[0].sprite.on('pointerdown', () => {
   sfx.button.play();
-  loadLevel(level1Script);
+  level = 1;
+  background.texture = gameBackgroundTexture;
+  loadLevel(levelScripts[level - 1]);
   mainMenuButtons.forEach((button) => {
     button.hide();
   });
@@ -147,7 +167,8 @@ let retryButtons = [pauseMenuButtons[1], winMenuButtons[1], loseMenuButtons[0]];
 retryButtons.forEach((button) => {
   button.sprite.on('pointerdown', () => {
     sfx.button.play();
-    loadLevel(currentLevel);
+    music.flippinMeat.stop();
+    loadLevel(currentLevelScript);
   });
 });
 
@@ -159,6 +180,7 @@ goBackToMenuButtons.forEach((button) => {
     loadMainMenu();
     music.flippinMeat.stop();
     music.mainMenuSong.play();
+    background.texture = menuBackgroundTexture;
   });
 })
 
@@ -176,3 +198,4 @@ for (let t of debugInfo) {
   debugPos += 20;
 }
 //potential bug: package-lock.json 5000 lines limit (?)
+//fix rotation speed limit

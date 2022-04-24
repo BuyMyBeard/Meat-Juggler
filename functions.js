@@ -1,9 +1,20 @@
+//vertical spritesheets
 function generateTextures(name, location, resolution, spriteCount) {
   game.loader.add(name, location);
   let spriteSheet = new PIXI.BaseTexture.from(game.loader.resources[name].url);
   let textures = [];
   for (let i = 0; i < spriteCount; i++) {
     textures[i] = new PIXI.Texture(spriteSheet, new PIXI.Rectangle(0, resolution * i, resolution, resolution));
+  }
+  return textures;
+}
+//horizontal spritesheets
+function generateTexturesH(name, location, width, height, spriteCount) {
+  game.loader.add(name, location);
+  let spriteSheet = new PIXI.BaseTexture.from(game.loader.resources[name].url);
+  let textures = [];
+  for (let i = 0; i < spriteCount; i++) {
+    textures[i] = new PIXI.Texture(spriteSheet, new PIXI.Rectangle(width * i, 0, width, height));
   }
   return textures;
 }
@@ -129,11 +140,11 @@ function gameLoop() {
 }
 
 function spawnFood() {
-  if (wave >= currentLevel.length) {
+  if (wave >= currentLevelScript.length) {
     wave = 0;
     frame = 0;
   }
-  let nextEvent = currentLevel[wave];
+  let nextEvent = currentLevelScript[wave];
   if (foodUsed == 0 && wave > 0) {
     frame = nextEvent;
   }
@@ -144,12 +155,15 @@ function spawnFood() {
 }
 
 function menuLoop() {
-  for (let food of foodArray) {
+  foodArray.forEach((food) => {
     food.update();
     if (food.state == -1) { 
       menuSpawnFoodRandomly(food);
     }
-  }
+  });
+  menuCloudArray.forEach((cloud) => {
+    cloud.update();
+  });
 }
 
 function updateLoop() {
@@ -185,19 +199,20 @@ function translateSecondsIntoFrames(array) {
   return newArray;
 }
 
-function loadLevel(level) {
+function loadLevel(levelScript) {
   foodArray.forEach((food) => {
     food.disable();
     food.sprite.interactive = true;
     foodServed = 0;
     foodGoal = 5;
   });
+  foodUsed = 0;
   frame = 0;
   wave = 0;
   gameState = 1;
-  currentLevel = level;
+  currentLevelScript = levelScript;
   bbq.sprite.x = (300);
-  plate.sprite.position.set(WIDTH - 200, HEIGHT - 150);
+  plate.display();
   lives.reset(); 
   music.mainMenuSong.stop();
   playGameSong();
@@ -272,6 +287,11 @@ function showHitboxes() {
     game.stage.addChild(box1);
     boxes.push(box1);
   }
+    let box4 = new graphics();
+    box4.beginFill(fill[1]).drawRect(plate.sprite.x,plate.sprite.y, plate.dimensions, plate.dimensions).endFill();
+    box4.alpha = 0.9;
+    game.stage.addChild(box4);
+    boxes.push(box4);
 }
 
 function loadMainMenu() {
