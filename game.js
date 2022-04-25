@@ -200,6 +200,16 @@ goBackToMenuButtons.forEach((button) => {
   });
 })
 
+// Play next level
+winMenuButtons[0].sprite.on('pointerdown', () => {
+  level++;
+  loadLevel(levelScripts[level - 1]);
+  console.log('Playing level ' + level);
+  winMenuButtons.forEach((button) => {
+    button.hide();
+  });
+});
+
 //debug Info
 let infoCount = 10;
 let debugInfo = new Array();
