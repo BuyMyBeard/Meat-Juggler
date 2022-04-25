@@ -198,6 +198,11 @@ soundButtons = [
   new SoundButton(WIDTH - 10, 10, soundTextures[1])
 ];
 
+let title = new PIXI.Sprite.from('./images/tittle.png');
+title.anchor.set(0.5, 0.5);
+title.position.set(WIDTH / 2, 150);
+game.stage.addChild(title);
+
 // Play
 mainMenuButtons[0].sprite.on('pointerdown', () => {
   sfx.button.play();
@@ -252,7 +257,6 @@ winMenuButtons[0].sprite.on('pointerdown', () => {
   level++;
   sfx.button.play();
   loadLevel(levelScripts[level - 1]);
-  console.log('Playing level ' + level);
   winMenuButtons.forEach((button) => {
     button.hide();
   });

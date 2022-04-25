@@ -21,10 +21,9 @@ function generateTexturesH(name, location, width, height, spriteCount) {
 
 function initializeFoodOnClickEvent(food) {
   food.sprite.on('pointerdown', () => {
-    if (food.cooldown > 0) { console.log(food.cooldown); return 0; }
+    if (food.cooldown > 0) { return 0; }
     food.cooldown += COOLDOWN;
     sfx.squich[randomIntegerGenerator(0,sfx.squich.length-1)].play();
-    console.log(food.cooldown);
     if (food.isCooking) {
       bbq.stopCooking(food.stopCooking());
     }
