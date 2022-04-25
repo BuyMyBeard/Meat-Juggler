@@ -23,6 +23,7 @@ class Food {
   framesCooked = 0;
   state = 1; // 1: raw   2: mid   3: done   4: well done   4: overcooked   5: burning   -1 = unused
   cooldown = 0;
+  isBurning = false
   
   constructor(x, y, xMomentum, yMomentum, angularMomentum, textures) {
     this.textures = textures;
@@ -65,6 +66,7 @@ class Food {
     this.sprite.xMomentum = 0;
     this.sprite.yMomentum = 0;
     this.sprite.alpha = 0;
+    this.isBurning = false;
     if (this.isCooking) {
       fixBBQ(this.cookingPositionIndex);
       this.isCooking = false;
@@ -114,7 +116,8 @@ class Food {
     const DONE = 6 * FPS;
     const WELLDONE = 9 * FPS;
     const BURNING = 12 * FPS;
-    const BURNED = 20 * FPS;
+    const BURNED = 16 * FPS;
+    const DISSAPEAR = 20 * FPS;
       switch (this.framesCooked) {
         case MEDIUM:
         case DONE:
@@ -124,14 +127,17 @@ class Food {
           break;
 
         case BURNING:
-          this.state++;
+          this.isBurning = true;
           this.fire.alpha = 1;
-          this.sprite.texture = this.textures[this.state];
           sfx.fire.play();
           break;
         
         case BURNED:
-          console.log("poof");
+          this.state++;
+          this.sprite.texture = this.textures[this.state];
+          break;
+
+        case DISSAPEAR:
           this.disable();
           lives.lose();
           break;
@@ -151,7 +157,7 @@ class Food {
     } else if (this.isCooking) {
       this.updateCooking();
     } else {
-      if (this.state == 5) {
+      if (this.isBurning) {
         this.updateCooking();
       }
       this.updateIndicator();
