@@ -347,10 +347,9 @@ function loadloseMenu() {
 
 function loadWinMenu() {
   if (level == levelScripts.length) {
-    //You completed all the levels!
-    loseMenuButtons.forEach((button) => {
-      button.display();
-    });
+    console.log('You completed all the levels!');
+    winMenuButtons[1].display;
+    winMenuButtons[2].display;
   } else {
     winMenuButtons.forEach((button) => {
       button.display();
@@ -360,4 +359,22 @@ function loadWinMenu() {
     food.sprite.interactive = false;
   })
   gameState = 2;
+}
+
+function toggleMusic() {
+  music.flippinMeat.mute(musicIsPlaying);
+  music.mainMenuSong.mute(musicIsPlaying);
+  musicIsPlaying = !musicIsPlaying;
+}
+
+function toggleSFX() {
+  sfx.button.mute(sfxIsPlaying);
+  sfx.fire.mute(sfxIsPlaying);
+  sfx.valid.mute(sfxIsPlaying);
+  sfx.invalid.mute(sfxIsPlaying);
+  sfx.grill.mute(sfxIsPlaying);
+  sfx.squich.forEach((s) => {
+    s.mute(sfxIsPlaying);
+  });
+  sfxIsPlaying = !sfxIsPlaying;
 }

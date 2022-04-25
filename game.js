@@ -125,12 +125,16 @@ document.addEventListener('keydown', (key) => {
       pauseMenuButtons.forEach((button) => {
         button.display();
       });
+      soundButtons[0].display();
+      soundButtons[1].display();
     } else if (gameState == -1) {
       gameState = 1;
       toggleBlur(false);
       pauseMenuButtons.forEach((button) => {
         button.hide();
       });
+      soundButtons[0].hide();
+      soundButtons[1].hide();
     }
   }
 });
@@ -157,6 +161,12 @@ loseMenuButtons = [
   new Button(WIDTH / 2, HEIGHT / 2 + 60, "Go back to Main Menu", buttonStyle, true)
 ];
 
+soundTextures = generateTextures('sound','./spritesheets/soundButtons_32x32.png', 32 * 4, 2);
+soundButtons = [
+  new SoundButton(WIDTH - 150, 10, soundTextures[0]),
+  new SoundButton(WIDTH - 10, 10, soundTextures[1])
+];
+
 // Play
 mainMenuButtons[0].sprite.on('pointerdown', () => {
   sfx.button.play();
@@ -166,6 +176,8 @@ mainMenuButtons[0].sprite.on('pointerdown', () => {
   mainMenuButtons.forEach((button) => {
     button.hide();
   });
+  soundButtons[0].hide();
+  soundButtons[1].hide();
 });
 
 // Resume
@@ -176,6 +188,8 @@ pauseMenuButtons[0].sprite.on('pointerdown', () => {
   pauseMenuButtons.forEach((button) => {
     button.hide();
   });
+  soundButtons[0].hide();
+  soundButtons[1].hide();
 });
 
 // Retry
@@ -203,12 +217,38 @@ goBackToMenuButtons.forEach((button) => {
 // Play next level
 winMenuButtons[0].sprite.on('pointerdown', () => {
   level++;
+  sfx.button.play();
   loadLevel(levelScripts[level - 1]);
   console.log('Playing level ' + level);
   winMenuButtons.forEach((button) => {
     button.hide();
   });
 });
+
+//missing case
+pauseMenuButtons[0].sprite.on('pointerdown', () => {
+  soundButtons[0].hide();
+  soundButtons[1].hide();
+});
+pauseMenuButtons[1].sprite.on('pointerdown', () => {
+  soundButtons[0].hide();
+  soundButtons[1].hide();
+});
+  
+
+// Music toggle
+let musicIsPlaying = true;
+soundButtons[0].sprite.on('pointerdown', () => {
+  toggleMusic();
+  sfx.button.play();
+})
+
+//SFX toggle
+let sfxIsPlaying = true;
+soundButtons[1].sprite.on('pointerdown', () => {
+  toggleSFX();
+  sfx.button.play();
+})
 
 //debug Info
 let infoCount = 10;

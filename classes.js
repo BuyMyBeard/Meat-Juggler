@@ -324,6 +324,24 @@ class Button {
     this.text.x = this.displayX;
   }
 }
+class SoundButton {
+  hiddenOffset = 2000;
+  constructor(x, y, texture) {
+    this.sprite = new PIXI.Sprite(texture);
+    this.sprite.anchor.set(1, 0);
+    this.sprite.position.set(x, y);
+    this.sprite.interactive = true;
+    game.stage.addChild(this.sprite);
+    this.displayX = x;
+    this.hiddenX = x + this.hiddenOffset;
+  }
+  hide() {
+    this.sprite.x = this.hiddenX;
+  }
+  display() {
+    this.sprite.x = this.displayX;
+  }
+}
 class Cloud {
   hiddenX = 5000;
   MinX = -1000
