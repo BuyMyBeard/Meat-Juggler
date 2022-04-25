@@ -358,8 +358,8 @@ function loadloseMenu() {
 function loadWinMenu() {
   if (level == levelScripts.length) {
     console.log('You completed all the levels!');
-    winMenuButtons[1].display;
-    winMenuButtons[2].display;
+    winMenuButtons[1].display();
+    winMenuButtons[2].display();
   } else {
     winMenuButtons.forEach((button) => {
       button.display();
@@ -367,7 +367,7 @@ function loadWinMenu() {
   }
   foodArray.forEach((food) => {
     food.sprite.interactive = false;
-  })
+  });
   gameState = 2;
 }
 

@@ -296,5 +296,3 @@ for (let t of debugInfo) {
   t.position.set(WIDTH - 30, debugPos);
   debugPos += 20;
 }
-//potential bug: package-lock.json 5000 lines limit (?)
-//fix win menu on last level
