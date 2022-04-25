@@ -266,6 +266,7 @@ function toggleBlur(isEnabled) {
     plate.sprite.filters = [blurFilter];
     backgroundLayer1.filters = [blurFilter];
     backgroundLayer2.filters = [blurFilter];
+    backgroundLayer3.filters = [blurFilter];
   } else { 
     foodArray.forEach((food) => {
       food.sprite.filters = null;
@@ -281,6 +282,7 @@ function toggleBlur(isEnabled) {
     plate.sprite.filters = null;
     backgroundLayer1.filters = null;
     backgroundLayer2.filters = null;
+    backgroundLayer3.filters = null;
   }
 }
 
