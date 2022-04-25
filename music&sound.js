@@ -32,7 +32,6 @@ function endSong() {
   music.flippinMeat.play('defeat');
 }
 
-
 let sfx = {
   button: new Howl({
     src: ['./sounds/button.wav']

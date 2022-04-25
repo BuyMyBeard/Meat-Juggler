@@ -11,7 +11,7 @@ const ACCELERATION = 0.1; // pixel/gametick²
 const MAXSPEED = 8;
 const MAXROTATIONINCREASE = 0.1;
 const MAXDELTAX = 50;
-maxAngularMomentum = 0.1; 
+let maxAngularMomentum = 0.1; 
 let lives;
 let foodUsed = 0;
 class Food {

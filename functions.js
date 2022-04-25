@@ -68,10 +68,10 @@ function initializeFoodOnClickEvent(food) {
     } else if (food.xMomentum <= - MAXSPEED) {
       food.xMomentum = - MAXSPEED;
     }
-    if (food.angularMomentum >= food.maxAngularMomentum) {
-      food.angularMomentum = food.maxAngularMomentum;
-    } else if (food.angularMomentum <= -food.maxAngularMomentum) {
-      food.angularMomentum = - food.maxAngularMomentum;
+    if (food.angularMomentum >= maxAngularMomentum) {
+      food.angularMomentum = maxAngularMomentum;
+    } else if (food.angularMomentum <= -maxAngularMomentum) {
+      food.angularMomentum = - maxAngularMomentum;
     }
   });
 }
@@ -192,6 +192,7 @@ function updateLoop() {
   }
   debugInfo[3].text = `food used : ${foodUsed} `;
   debugInfo[4].text = `food cooked : ${foodServed} / ${foodGoal}`;
+  debugInfo[5].text = `rotation : ${foodArray[0].angularMomentum} / ${maxAngularMomentum}`
 }
 
 function translateSecondsIntoFrames(array) {
