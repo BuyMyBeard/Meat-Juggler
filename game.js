@@ -17,17 +17,35 @@ const FPS = Math.round(game.ticker.FPS);
 let style = new PIXI.TextStyle({
   fontFamily: 'Arial',
   fontSize: 15,
-  fill: '#FFFFFF',
-  stroke: '#EEEEEE'
+  fill: '#1005FF',
+  stroke: '#000000',
+  strokeThickness: 2
 });
 
 let buttonStyle = new PIXI.TextStyle({
-  fontFamily: 'Impact',
+  fontFamily: 'Georgia, Serif',
   fontSize: 40,
   fill: ['#F08080', '#AA3C3B'],
   stroke: '#000000',
   strokeThickness: 4,
   letterSpacing: 2
+});
+
+let textStyle = new PIXI.TextStyle({
+  fontFamily: 'Georgia, Serif',
+  fontSize: 20,
+  fill: ['#F08080', '#AA3C3B'],
+  stroke: '#000000',
+  strokeThickness: 2
+});
+const winTextStyle = new PIXI.TextStyle({
+  fill: [
+      "#f08080",
+      "#aa3c3b"
+  ],
+  fontFamily: "Comic Sans MS",
+  fontSize: 70,
+  strokeThickness: 4
 });
 
 let pointerPosition;
@@ -102,12 +120,16 @@ gameState = 0 // -1: pause   0: menu   1: game   -2: lose   2: win
 
 lives = new Lives(3, 40);
 lives.disable();
-
-
+let objectivePerLevel = [3,4,5,6,7];
+objectivePerLevel = [1,1,1,1,1]
+let maxMeatPerLevel = [1,2,2,3,3];
 let levelScripts = [
-  translateSecondsIntoFrames([1, 10, 20, 30, 35, 45, 55, 65, 75, 80]),
-  translateSecondsIntoFrames([1, 6, 12, 15, 20, 26, 30, 35, 42, 48])
-]
+  translateSecondsIntoFrames([1, 10, 20, 30]),
+  translateSecondsIntoFrames([1, 10, 20, 30]),
+  translateSecondsIntoFrames([1, 5, 15, 25]),
+  translateSecondsIntoFrames([1, 10, 20, 30]),
+  translateSecondsIntoFrames([1, 5, 15, 25])
+];
 let level;
 let currentLevelScript;
 let wave;
@@ -265,4 +287,4 @@ for (let t of debugInfo) {
   debugPos += 20;
 }
 //potential bug: package-lock.json 5000 lines limit (?)
-//fix rotation speed limit
+//fix win menu on last level

@@ -151,7 +151,7 @@ function spawnFood() {
   if (foodUsed == 0 && wave > 0) {
     frame = nextEvent;
   }
-  if (frame == nextEvent && foodUsed < level) {
+  if (frame == nextEvent && foodUsed < maxMeatPerLevel[level - 1]) {
     spawnFoodAbove(getFirstUnusedFood());
     wave++;
   }
@@ -208,7 +208,7 @@ function loadLevel(levelScript) {
     food.disable();
     food.sprite.interactive = true;
     foodServed = 0;
-    foodGoal = 5;
+    foodGoal = objectivePerLevel[level - 1];
   });
   menuCloudArray.forEach((cloud) => {
     cloud.hide();
