@@ -258,6 +258,9 @@ function toggleBlur(isEnabled) {
     lives.hearts.forEach((heart) => {
       heart.filters = [blurFilter];
     });
+    gameCloudArray.forEach((cloud) => {
+      cloud.sprite.filters = [blurFilter];
+    });
     bbq.sprite.filters = [blurFilter];
     plate.sprite.filters = [blurFilter];
     backgroundLayer1.filters = [blurFilter];
@@ -269,6 +272,9 @@ function toggleBlur(isEnabled) {
     });
     lives.hearts.forEach((heart) => {
       heart.filters = null;
+    });
+    gameCloudArray.forEach((cloud) => {
+      cloud.sprite.filters = null;
     });
     bbq.sprite.filters = null;
     plate.sprite.filters = null;
@@ -364,6 +370,11 @@ function loadWinMenu() {
 function toggleMusic() {
   music.flippinMeat.mute(musicIsPlaying);
   music.mainMenuSong.mute(musicIsPlaying);
+  if (musicIsPlaying) {
+    soundButtons[0].sprite.filters = [alphaFilter];
+  } else {
+    soundButtons[0].sprite.filters = null;
+  }
   musicIsPlaying = !musicIsPlaying;
 }
 
@@ -376,5 +387,10 @@ function toggleSFX() {
   sfx.squich.forEach((s) => {
     s.mute(sfxIsPlaying);
   });
+  if (sfxIsPlaying) {
+    soundButtons[1].sprite.filters = [alphaFilter];
+  } else {
+    soundButtons[1].sprite.filters = null;
+  }
   sfxIsPlaying = !sfxIsPlaying;
 }

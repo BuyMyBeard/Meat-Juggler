@@ -140,6 +140,7 @@ document.addEventListener('keydown', (key) => {
 });
 
 blurFilter = new PIXI.filters.BlurFilter();
+alphaFilter = new PIXI.filters.AlphaFilter(0.5);
 
 mainMenuButtons = [
   new Button(WIDTH / 2, HEIGHT / 2, "Play", buttonStyle, false),
