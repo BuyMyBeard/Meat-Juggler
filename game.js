@@ -63,8 +63,8 @@ foodTextures = [
   generateTextures('steak', './spritesheets/steak.png', 32 * 4, 6)
 ];
 
-cloudTextures = generateTexturesH('clouds', './spritesheets/clouds_137x86.png',137 * 4, 86 * 4, 5);
-
+let cloudTextures = generateTexturesH('clouds', './spritesheets/clouds_137x86.png',137 * 4, 86 * 4, 5);
+let fireTextures = generateTexturesH('fire', './spritesheets/fire.png', 32 * 4, 32 * 4, 4);
 
 const COOLDOWN = 30;
 

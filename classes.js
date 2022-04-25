@@ -35,9 +35,17 @@ class Food {
     this.angularMomentum = angularMomentum;
     this.sprite.rotation = 0;
     this.indicator = new Indicator(this.textures[0]);
+    this.fire = new PIXI.AnimatedSprite(fireTextures);
+    this.fire.anchor.set(0.5, 0.8);
+    this.fire.position.set(x, y);
+    this.fire.play();
+    this.fire.animationSpeed = 0.1;
+    this.fire.alpha = 0;
     game.stage.addChild(this.sprite);
+    game.stage.addChild(this.fire);
     game.stage.addChild(this.indicator.sprite);
     foodUsed++;
+    
   }
   recycle(x, y, xMomentum, yMomentum, angularMomentum, textures) {
     this.textures = textures;
@@ -52,6 +60,7 @@ class Food {
     foodUsed++;
   }
   disable() {
+    this.fire.alpha = 0;
     this.sprite.position.set(-2000, 1000);
     this.sprite.xMomentum = 0;
     this.sprite.yMomentum = 0;
@@ -99,6 +108,7 @@ class Food {
     }
   }
   updateCooking() {
+    this.fire.position.set(this.sprite.x, this.sprite.y);
     this.framesCooked++;
     const MEDIUM = 3 * FPS;
     const DONE = 6 * FPS;
@@ -115,8 +125,8 @@ class Food {
 
         case BURNING:
           this.state++;
+          this.fire.alpha = 1;
           this.sprite.texture = this.textures[this.state];
-          console.log("fire");
           sfx.fire.play();
           break;
         
