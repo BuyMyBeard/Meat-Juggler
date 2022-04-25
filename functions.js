@@ -182,8 +182,8 @@ function updateLoop() {
     default:
       break;
   }
-  debugInfo[0].text = `meat position : (${Math.round(foodArray[0].sprite.x)}, ${Math.round(foodArray[0].sprite.y)})`;
-  debugInfo[1].text = `meat momentum : (${foodArray[0].xMomentum.toFixed(1)}, ${foodArray[0].yMomentum.toFixed(1)})`;
+  debugInfo[0].text = `frame : ${frame}`;
+  debugInfo[1].text = `wave : ${wave}`;
   if (pointerPosition == undefined) {
     debugInfo[2].text = "pointer unvailable";
   } else {
@@ -191,7 +191,7 @@ function updateLoop() {
   }
   debugInfo[3].text = `food used : ${foodUsed} `;
   debugInfo[4].text = `food cooked : ${foodServed} / ${foodGoal}`;
-  debugInfo[5].text = `rotation : ${foodArray[0].angularMomentum} / ${maxAngularMomentum}`
+  
 }
 
 function translateSecondsIntoFrames(array) {
@@ -203,6 +203,7 @@ function translateSecondsIntoFrames(array) {
 }
 
 function loadLevel(levelScript) {
+  title.alpha = 0;
   foodArray.forEach((food) => {
     food.disable();
     food.sprite.interactive = true;
@@ -254,7 +255,9 @@ function toggleBlur(isEnabled) {
   if (isEnabled) {
     foodArray.forEach((food) => {
       food.sprite.filters = [blurFilter];
-      food.indicator.sprite.filters = [blurFilter];                    
+      food.indicator.sprite.filters = [blurFilter]; 
+      food.fire.filters = [blurFilter];   
+      food.fire.stop();                
     });
     lives.hearts.forEach((heart) => {
       heart.filters = [blurFilter];
@@ -271,6 +274,8 @@ function toggleBlur(isEnabled) {
     foodArray.forEach((food) => {
       food.sprite.filters = null;
       food.indicator.sprite.filters = null;
+      food.fire.filters = null;                   
+      food.fire.play();
     });
     lives.hearts.forEach((heart) => {
       heart.filters = null;
@@ -315,6 +320,7 @@ function showHitboxes() {
 }
 
 function loadMainMenu() {
+  title.alpha = 1;
   toggleBlur(false);
   gameState = 0;
   foodArray.forEach((food) => {

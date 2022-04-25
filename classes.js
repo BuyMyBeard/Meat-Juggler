@@ -191,6 +191,7 @@ class Food {
     if (!this.isFadingOut) {
       if (this.state == 3 || this.state == 4) {
         foodServed++;
+        frame = currentLevelScript[wave] - 1 * FPS;
         sfx.valid.play();
       } else {
         lives.lose();

@@ -129,12 +129,12 @@ gameState = 0 // -1: pause   0: menu   1: game   -2: lose   2: win
 lives = new Lives(3, 40);
 lives.disable();
 let objectivePerLevel = [3,4,5,6,7];
-objectivePerLevel = [1,1,1,1,1]
+// objectivePerLevel = [1,1,1,1,1];
 let maxMeatPerLevel = [1,2,2,3,3];
 let levelScripts = [
-  translateSecondsIntoFrames([1, 10, 20, 30]),
-  translateSecondsIntoFrames([1, 10, 20, 30]),
-  translateSecondsIntoFrames([1, 5, 15, 25]),
+  translateSecondsIntoFrames([1, 10, 20, 30, 40, 50]),
+  translateSecondsIntoFrames([1, 10, 20, 30, 40, 50, 60]),
+  translateSecondsIntoFrames([1, 7, 14, 21, 28, 35, 42, 49]),
   translateSecondsIntoFrames([1, 10, 20, 30]),
   translateSecondsIntoFrames([1, 5, 15, 25])
 ];
@@ -288,6 +288,7 @@ soundButtons[1].sprite.on('pointerdown', () => {
 })
 
 //debug Info
+
 let infoCount = 10;
 let debugInfo = new Array();
 for (let i = 0; i < infoCount; i++) {
@@ -300,3 +301,4 @@ for (let t of debugInfo) {
   t.position.set(WIDTH - 30, debugPos);
   debugPos += 20;
 }
+
