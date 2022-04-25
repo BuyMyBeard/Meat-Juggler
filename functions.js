@@ -151,7 +151,7 @@ function spawnFood() {
   if (foodUsed == 0 && wave > 0) {
     frame = nextEvent;
   }
-  if (frame == nextEvent && foodUsed < foodArray.length) {
+  if (frame == nextEvent && foodUsed < level) {
     spawnFoodAbove(getFirstUnusedFood());
     wave++;
   }
@@ -346,9 +346,16 @@ function loadloseMenu() {
 }
 
 function loadWinMenu() {
-  winMenuButtons.forEach((button) => {
-    button.display();
-  });
+  if (level == levelScripts.length) {
+    //You completed all the levels!
+    loseMenuButtons.forEach((button) => {
+      button.display();
+    });
+  } else {
+    winMenuButtons.forEach((button) => {
+      button.display();
+    });
+  }
   foodArray.forEach((food) => {
     food.sprite.interactive = false;
   })
