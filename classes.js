@@ -250,6 +250,7 @@ class Plate {
     this.sprite = new PIXI.Sprite.from("./images/plate_32x32.png");
     this.sprite.position.set(x, y);
     game.stage.addChild(this.sprite);
+    this.savedX = x;
   }
   hitboxCollided(x, y) {
     let isWithinHitboxX = x >= this.sprite.position.x && x <= this.sprite.position.x + this.dimensions;
@@ -261,7 +262,7 @@ class Plate {
     this.sprite.x = this.hiddenX;
   }
   display() {
-    this.sprite.position.set(WIDTH - 160, HEIGHT - 165);
+    this.sprite.position.x = this.savedX;
   }
 }
 class Lives {

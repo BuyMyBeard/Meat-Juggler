@@ -225,6 +225,7 @@ function loadLevel(levelScript) {
   plate.display();
   lives.reset(); 
   music.mainMenuSong.stop();
+  music.flippinMeat.stop();
   playGameSong();
   mainMenuButtons.forEach((button) => {
     button.hide();

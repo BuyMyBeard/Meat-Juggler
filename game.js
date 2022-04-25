@@ -108,7 +108,8 @@ backgroundLayer3.texture = null;
 
 
 let bbq = new BBQ(-1000);
-let plate = new Plate(0, -1000);
+let plate = new Plate(WIDTH - 165, HEIGHT - 200);
+plate.hide();
 
 let foodArray = [
   new Food(-100, 500, 8, -5, 0.05, foodTextures[0]),
