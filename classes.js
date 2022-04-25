@@ -204,13 +204,14 @@ hiddenX = -1000;
 class BBQ {
   width = 512;
   hiddenX = -2000;
+  yOffset = 40;
   isBusy = [false, false, false];
-  hitboxYStart = HEIGHT - 140;
-  hitboxYEnd = HEIGHT - 100;
+  hitboxYStart = HEIGHT - 140 + this.yOffset;
+  hitboxYEnd = HEIGHT - 100 + this.yOffset;
   constructor(x) {
     this.sprite = new PIXI.Sprite.from('./images/BBQ_grill.png');
     this.sprite.anchor.set(0, 1);
-    this.sprite.position.set(x, HEIGHT);
+    this.sprite.position.set(x, HEIGHT + this.yOffset);
     game.stage.addChild(this.sprite);
   }
   // returns an array [cookingPositionX, cookingPositionY, cookingPositionIndex]. 
