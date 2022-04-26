@@ -72,11 +72,19 @@ function initializeFoodOnClickEvent(food) {
     } else if (food.angularMomentum <= -maxAngularMomentum) {
       food.angularMomentum = - maxAngularMomentum;
     }
-    
     //spatula animation
-    spatula.position.set(food.sprite.x, food.sprite.y)
-    spatula.alpha = 1;
-    spatula.gotoAndPlay(0);
+    if (deltaX > 0) {
+      console.log('right');
+      spatulaRight.position.set(food.sprite.x, food.sprite.y)
+      spatulaRight.alpha = 1;
+      spatulaRight.gotoAndPlay(0);
+    } else {
+      console.log('left');
+      spatulaLeft.position.set(food.sprite.x, food.sprite.y)
+      spatulaLeft.alpha = 1;
+      spatulaLeft.gotoAndPlay(0);
+    }
+
   });
 }
 

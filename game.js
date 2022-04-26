@@ -104,14 +104,24 @@ let bbq = new BBQ(-1000);
 let plate = new Plate(WIDTH - 165, HEIGHT - 200);
 plate.hide();
 
-let spatula = new PIXI.AnimatedSprite(generateTexturesH('spatula', './spritesheets/spatula.png',256, 368, 3));
-spatula.anchor.set(0.5, 0.3);
-spatula.animationSpeed = 0.2;
-game.stage.addChild(spatula);
-spatula.alpha = 0;
-spatula.loop = false;
-spatula.onComplete = function() {
-  spatula.alpha = 0;
+let spatulaRight = new PIXI.AnimatedSprite(generateTexturesH('spatulaRight', './spritesheets/spatula-right.png',256, 368, 3));
+spatulaRight.anchor.set(0.5, 0.3);
+spatulaRight.animationSpeed = 0.2;
+game.stage.addChild(spatulaRight);
+spatulaRight.alpha = 0;
+spatulaRight.loop = false;
+spatulaRight.onComplete = function() {
+  spatulaRight.alpha = 0;
+};
+
+let spatulaLeft = new PIXI.AnimatedSprite(generateTexturesH('spatulaLeft', './spritesheets/spatula-left.png',256, 368, 3));
+spatulaLeft.anchor.set(0.5, 0.3);
+spatulaLeft.animationSpeed = 0.2;
+game.stage.addChild(spatulaLeft);
+spatulaLeft.alpha = 0;
+spatulaLeft.loop = false;
+spatulaLeft.onComplete = function() {
+  spatulaLeft.alpha = 0;
 };
 
 
