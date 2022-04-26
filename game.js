@@ -327,7 +327,7 @@ howToPlay.addText('You can click the meat pieces to juggle them in the air',100,
 howToPlay.addText('The pieces of meat are always launched upwards, but you \ncan affect their trajectory depending on where you hit them', 100, 275);
 howToPlay.addText('Your guests only like Medium and Well-done meat, so make \nsure you serve them the way they like it', 100, 375);
 howToPlay.addText('If you drop meat on the bottom of the screen or serve it \nin an inedible way, you lose hearts!', 100, 475)
-howToPlay.addSprite(plate.sprite.texture, WIDTH / 2 - 150, 30);
+howToPlay.addSprite(plate.sprite.texture, WIDTH / 2 - 50, 30);
 howToPlay.addSprite(foodTextures[0][3], 300, HEIGHT - 200);
 howToPlay.addSprite(foodTextures[4][4], 400, HEIGHT - 200);
 howToPlay.addText('Good', 370, HEIGHT - 90);
