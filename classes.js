@@ -387,3 +387,50 @@ class Cloud {
     this.sprite.x = this.savedPosition;
   }
 }
+class PopupMenu {
+  content = [];
+  savedX = WIDTH - 50;
+  hiddenX = -2000;
+  constructor() {
+    this.background = new PIXI.Graphics();
+    this.background.beginFill(0x00008B).drawRect(0, 0, WIDTH, HEIGHT).endFill();
+    this.background.alpha = 0.85;
+    this.background.interactive = true;
+    game.stage.addChild(this.background);
+    this.exitButton = new PIXI.Sprite.from('./images/X_Button.png');
+    this.exitButton.anchor.set(1, 0);
+    this.exitButton.position.set(this.savedX, 5);
+    this.exitButton.interactive = true;
+    game.stage.addChild(this.exitButton);
+    this.exitButton.on('pointerdown', () => {
+      this.hide();
+      sfx.button.play();
+    });
+  }
+  addText(text, x, y) {
+    text = new PIXI.Text(text, textStyle);
+    text.position.set(x, y);
+    game.stage.addChild(text);
+    this.content.push(text);
+  }
+  addSprite(texture, x, y) {
+    let sprite = new PIXI.Sprite(texture);
+    sprite.position.set(x, y);
+    game.stage.addChild(sprite);
+    this.content.push(sprite);
+  }
+  hide() {
+    this.content.forEach((item) => {
+      item.alpha = 0;
+    });
+    this.exitButton.x = this.hiddenX;
+    this.background.x = 5000;
+  }
+  display() {
+    this.content.forEach((item) => {
+      item.alpha = 1;
+    });
+    this.exitButton.x = this.savedX;
+    this.background.x = 0;
+  }
+}

@@ -72,6 +72,11 @@ function initializeFoodOnClickEvent(food) {
     } else if (food.angularMomentum <= -maxAngularMomentum) {
       food.angularMomentum = - maxAngularMomentum;
     }
+    
+    //spatula animation
+    spatula.position.set(food.sprite.x, food.sprite.y)
+    spatula.alpha = 1;
+    spatula.gotoAndPlay(0);
   });
 }
 
@@ -182,16 +187,7 @@ function updateLoop() {
     default:
       break;
   }
-  debugInfo[0].text = `frame : ${frame}`;
-  debugInfo[1].text = `wave : ${wave}`;
-  if (pointerPosition == undefined) {
-    debugInfo[2].text = "pointer unvailable";
-  } else {
-    debugInfo[2].text = `cursor position : (${Math.round(pointerPosition.x)}, ${Math.round(pointerPosition.y)})`;
-  }
-  debugInfo[3].text = `food used : ${foodUsed} `;
-  debugInfo[4].text = `food cooked : ${foodServed} / ${foodGoal}`;
-  
+  objectiveText.text = `Food cooked : ${foodServed} / ${foodGoal}`;
 }
 
 function translateSecondsIntoFrames(array) {
@@ -203,6 +199,7 @@ function translateSecondsIntoFrames(array) {
 }
 
 function loadLevel(levelScript) {
+  objectiveText.alpha = 1;
   title.alpha = 0;
   foodArray.forEach((food) => {
     food.disable();
@@ -362,7 +359,7 @@ function loadloseMenu() {
 
 function loadWinMenu() {
   if (level == levelScripts.length) {
-    console.log('You completed all the levels!');
+    winText.alpha = 1;
     winMenuButtons[1].display();
     winMenuButtons[2].display();
   } else {
