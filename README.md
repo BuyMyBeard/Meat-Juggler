@@ -1,4 +1,4 @@
-#Meat Juggler
+# Meat Juggler
 
 This game was submitted for the 2022 Gamedev.js game jam. 
 It is playable here: https://juanlrodriguesz.itch.io/meat-juggler
