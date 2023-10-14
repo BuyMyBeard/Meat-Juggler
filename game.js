@@ -9,6 +9,7 @@ let game = new application({
   antialias: true,
 });
 
+game.ticker.maxFPS = 60;
 document.body.appendChild(game.view);
 game.renderer.view.style.position = 'absolute';
 let graphics = PIXI.Graphics;
@@ -164,7 +165,7 @@ let wave;
 let foodServed;
 let foodGoal;
 
-game.ticker.add(delta => updateLoop(delta));
+game.ticker.add(updateLoop);
 music.mainMenuSong.play();
 
 document.addEventListener('keydown', (key) => {
